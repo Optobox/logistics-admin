@@ -8,7 +8,15 @@ module.exports = {
     "./src/includes/**{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      container: {
+        center: true,
+        padding: '1rem'
+      }
+    },
   },
   plugins: [],
+  corePlugins: {
+    preflight: false,
+  }
 }
