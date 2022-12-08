@@ -40,7 +40,7 @@ function ItemActions({
           color={'green'}
           px={30}
           onClick={() => confirmModal('Вы действительно хотите заключить заявку?', 'done', 'Подтвердить')}
-          disabled={again || !item?.our_cost}
+          disabled={again || !item?.received_sum}
         >
           Заключить
         </Button>

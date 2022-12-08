@@ -29,13 +29,17 @@ const consultSchema = yup.object().shape({
 
 const trackValueSchema = yup.object().shape({
   // insurance: yup.number().typeError(''),
+  boxes: yup.number().typeError('Введите число').required("Заполните данное поле"),
+  cube: yup.number().typeError('Введите число').required("Заполните данное поле"),
+  cube_cost: yup.number().typeError('Введите число').required("Заполните данное поле"),
   weight: yup.number().typeError('Введите число').required("Заполните данное поле"),
   weight_cost: yup.number().typeError('Введите число').required("Заполните данное поле"),
   total_cost: yup.number().typeError('Введите число').required("Заполните данное поле"),
-  cube: yup.number().typeError('Введите число').required("Заполните данное поле"),
+  pack_cost: yup.number().typeError('Введите число').required("Заполните данное поле"),
+  pack: yup.array().required("Заполните данное поле"),
   // carcas: yup.number('Неверный формат, введите цифры').typeError(''),
-  boxes: yup.number().typeError('Введите число').required("Заполните данное поле"),
   note_id: yup.string().required('Заполните данное поле'),
+  carcas: yup.number().typeError('Введите число')
 })
 
 export {

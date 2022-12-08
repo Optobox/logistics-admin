@@ -1,22 +1,45 @@
 import React from 'react'
 import { TextInput, Select, PasswordInput, Button } from '@mantine/core'
+import axios from 'axios'
+import { addDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
+import { db } from '../../utlis/firebase'
+import { randomId } from '@mantine/hooks'
 
 
 function CreateManager() {
 
-  const [value, setValue] = React.useState({
+  const [visor, setVisor] = React.useState({
     email: '',
     phoneNumber: '',
     password: '',
     password_confirmation: '',
     displayName: '',
-    photoURL: '',
-    disabled: false
   })
 
+  const createUser = async (e) => {
+    e.preventDefault()
+    await axios.post('/api/users', {
+      email: visor.email,
+      password: visor.password, 
+      displayName: visor.displayName
+    })
+    .then(e => {
+      console.log(e);
+    })
+    .catch(err => {
 
-  const createUser = async () => {
+    })
+  }
 
+  const createUserStore = async () => {
+    await addDoc(doc(db, 'users'), {
+      
+    })
+  }
+
+  const handleInput = e => {
+    const {name, value} = e.target
+    setVisor({...visor, [name]: value})
   }
 
 
@@ -27,37 +50,33 @@ function CreateManager() {
         <TextInput
           label='Имя Фамилия'
           name='displayName'
-          value={value.displayName ?? ''}
-          onChange={e => setValue({...value, displayName: e.target.value})}
+          value={visor.displayName ?? ''}
+          onChange={handleInput}
         />
         <TextInput
           label='Телефон'
           name='phoneNumber'
-          value={value.displayName ?? ''}
-          onChange={e => setValue({...value, phoneNumber: e.target.value})}
-        />
-        <Select
-          data={[]}
-          label='Роль'
+          value={visor.phoneNumber ?? ''}
+          onChange={handleInput}
         />
         <TextInput
           label='Почта'
           name='email'
-          value={value.email ?? ''}
-          onChange={e => setValue({...value, email: e.target.value})}
+          value={visor.email ?? ''}
+          onChange={handleInput}
         />
         <PasswordInput
           label='Пароль'
           name='password'
-          value={value.password ?? ''}
-          onChange={e => setValue({...value, password: e.target.value})}
+          value={visor.password ?? ''}
+          onChange={handleInput}
           visible
         />
         <PasswordInput
           label='Подтверждение пароля'
           name='password_confirmation'
-          value={value.password_confirmation ?? ''}
-          onChange={e => setValue({...value, password_confirmation: e.target.value})}
+          value={visor.password_confirmation ?? ''}
+          onChange={handleInput}
           visible
         />
         <Button type='submit'>

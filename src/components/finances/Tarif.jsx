@@ -1,78 +1,73 @@
-import { Button, TextInput } from '@mantine/core'
-import { doc, updateDoc } from 'firebase/firestore'
 import React from 'react'
-import { useDocumentData } from 'react-firebase-hooks/firestore'
+import { TextInput, Button, NumberInput } from '@mantine/core'
 import { db } from '../../utlis/firebase'
+import { doc } from 'firebase/firestore'
+import { PermissionContext } from '../../layout/Layout'
 
-const regex = /^[\.0-9]*$/
+// const regex = (/^(([0-9.]?)*)+$/)
 
-function Settings() {
+function Tarif() {
 
-  const [value, loading] = useDocumentData(doc(db, 'tarif', 'tarif'))
+  const {tarif} = React.useContext(PermissionContext)
 
-  const [tarif, setTarif] = React.useState({})
+  const [tax, setTax] = React.useState({})
 
   const handleInput = (e) => {
     const {name, value} = e.target
-    if (regex.test(value)) {
-      setTarif({...tarif, [name]: value})
-    }
+    setTax({...tax, [name]: parseInt(value) ? parseInt(value) : value})
   }
 
   const saveTarif = async () => {
     await updateDoc(doc(db, 'tarif', 'tarif'), {
-      ...tarif
+      ...tax
     })
     .then(() => {
       alert('Тариф успешно изменен')
     })
-    .catch(() => {
-
-    })
   }
 
   React.useEffect(() => {
-    if (value) setTarif(value)
-  }, [value, loading])
-
-  if (loading) return <></>
+    if (tarif) {
+      setTax(tarif)
+    }
+  }, [tarif])
 
   return (
     <div className='space-y-4'>
       <div className='grid grid-cols-2 gap-4 max-w-xs'>
         <TextInput
           name='deliver_cost'
-          value={tarif.deliver_cost ?? ''}
+          value={tax.deliver_cost ?? ''}
           onChange={handleInput}
           label='Доставка'
         />
         <TextInput
           name='manager'
-          value={tarif.manager ?? ''}
+          value={tax.manager ?? ''}
           onChange={handleInput}
           label='Глав. менеджер'
         />
         <TextInput
           name='purchase_manager'
-          value={tarif.purchase_manager ?? ''}
+          value={tax.purchase_manager ?? ''}
           onChange={handleInput}
           label='Закуп. менеджер'
         />
         <TextInput
           name='our_cost'
-          value={tarif.our_cost ?? ''}
+          value={tax?.our_cost ?? ''}
           onChange={handleInput}
           label='Наша доля'
         />
         <TextInput
           name='service_manager'
-          value={tarif.service_manager ?? ''}
+          value={tax.service_manager ?? ''}
           onChange={handleInput}
           label='Сервис менеджер'
         />
         <TextInput
           name='logist_manager'
-          value={tarif.logist_manager ?? ''}
+          value={tax.logist_manager ?? ''}
           onChange={handleInput}
           label='Логист менеджер'
         />
@@ -86,4 +81,4 @@ function Settings() {
   )
 }
 
-export default Settings
+export default Tarif

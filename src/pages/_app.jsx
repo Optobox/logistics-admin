@@ -4,8 +4,13 @@ import { createEmotionCache, MantineProvider } from '@mantine/core'
 import theme from '../utlis/theme'
 import { ModalsProvider } from '@mantine/modals'
 import { NotificationsProvider } from '@mantine/notifications'
+import { useCollectionData } from 'react-firebase-hooks/firestore'
+import { collection, query } from 'firebase/firestore'
+import { db } from '../utlis/firebase'
+
 
 function MyApp({ Component, pageProps }) {
+
 
   return (
     <MantineProvider

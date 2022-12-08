@@ -1,12 +1,8 @@
+import React from 'react'
 import { Table } from '@mantine/core'
 import dayjs from 'dayjs'
-import { collection, query } from 'firebase/firestore'
-import React from 'react'
-import { useCollectionData } from 'react-firebase-hooks/firestore'
-import { db } from '../../utlis/firebase'
 
 function ManagersTable({managers}) {
-
 
   const checkRole = (role) => {
     if (role.includes('service')) return 'Сервис менеджер'

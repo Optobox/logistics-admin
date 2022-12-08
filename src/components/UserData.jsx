@@ -2,14 +2,14 @@ import { Avatar } from '@mantine/core'
 import dayjs from 'dayjs'
 import { doc,} from 'firebase/firestore'
 import React from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { useDocumentData } from 'react-firebase-hooks/firestore'
+import useAuth from '../hooks/useAuth'
 import { PermissionContext } from '../layout/Layout'
-import { auth, db } from '../utlis/firebase'
+import { db } from '../utlis/firebase'
 
 function UserData() {
 
-  const [user, loading] = useAuthState(auth)
+  const {user, loading} = useAuth()
 
   const {service, manager, logist, transac, purchase, admin} = React.useContext(PermissionContext)
 

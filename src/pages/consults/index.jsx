@@ -1,26 +1,27 @@
 import React from 'react'
 import { Tabs } from '@mantine/core'
-import { useCollectionData } from 'react-firebase-hooks/firestore'
-import { collection, query } from 'firebase/firestore'
-import { db } from '../../utlis/firebase'
-
 import { ConsultView } from '../../components'
+import { DataContext, PermissionContext } from '../../layout/Layout'
+import useAuth from '../../hooks/useAuth'
 
 function Consults() {
 
-  const [values] = useCollectionData(query(collection(db, 'consults')))
+  const {consults} = React.useContext(DataContext)
 
-  const active = values?.filter((item) => {
+  const {user} = useAuth()
+
+  const {admin} = React.useContext(PermissionContext)
+
+  const active = consults?.filter((item) => {
     return item.status == 'raw'
   })
 
-
-  const rejected = values?.filter((item) => {
-    return item.status === "rejected"
+  const rejected = consults?.filter((item) => {
+    return item.status === "rejected" && ((item.manager?.uid === user?.uid) || admin)
   })
 
-  const done = values?.filter((item) => {
-    return item.status == 'done'
+  const done = consults?.filter((item) => {
+    return item.status == 'done' && ((item.manager?.uid === user?.uid) || admin)
   })
 
   return (

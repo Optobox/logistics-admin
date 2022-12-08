@@ -1,25 +1,31 @@
 import React from 'react'
 
-import { collection,  query } from 'firebase/firestore'
-import { db } from '../../utlis/firebase'
-import { useCollection, useCollectionData } from 'react-firebase-hooks/firestore'
-import DeliveryView from '../../components/DeliveryView'
-import { PermissionContext } from '../../layout/Layout'
+import DeliveryView from '../../components/delivery/DeliveryView'
+import { DataContext, PermissionContext } from '../../layout/Layout'
 import { Tabs } from '@mantine/core'
+import useAuth from '../../hooks/useAuth'
 
 function Deliveries() {
 
-  const [tracks, loading, error] = useCollectionData(query(collection(db, 'track')))
 
-  const {service, purchase, transac} = React.useContext(PermissionContext)
+  const {tracks} = React.useContext(DataContext)
 
-  const deliveries = tracks?.filter((e => {
-    return !e.isTracking
+  const {service, purchase, transac, admin} = React.useContext(PermissionContext)
+
+  const {user} = useAuth()
+
+  const myDeliveries = tracks?.filter((e => {
+    return !e.isTrackikng && ((e.manager?.uid == user?.uid || (admin && !e.isTracking)))  
+  }))
+  
+  const deliveries = tracks?.filter((e => { 
+    return !e.isTracking && !e.manager
   }))
 
-  const sortedBySMallest = deliveries?.sort((a, b) => {
-    return b.createdAt?.seconds - a.createdAt?.seconds
-  })
+  console.log(deliveries);
+  // const sortedBySMallest = deliveries?.sort((a, b) => {
+  //   return b.createdAt?.seconds - a.createdAt?.seconds
+  // })
 
   if (service || purchase || transac) return <></>
 
@@ -38,11 +44,11 @@ function Deliveries() {
             <Tabs.Tab value='В работе'>В работе</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value='Активные' pt='md'>
-            <DeliveryView values={tracks} />    
+            <DeliveryView values={deliveries} />    
           </Tabs.Panel>
 
           <Tabs.Panel value='В работе' pt='md'>
-            <DeliveryView values={tracks} />    
+            <DeliveryView values={myDeliveries} />    
           </Tabs.Panel>
         </Tabs>
       </div>

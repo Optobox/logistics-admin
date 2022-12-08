@@ -1,7 +1,5 @@
 import React from 'react'
-import { Button } from '@mantine/core'
 import Head from 'next/head'
-import axios from 'axios'
 import Login from '../layout/Login'
 import { PermissionContext } from '../layout/Layout'
 import { UserData } from '../components'
@@ -26,8 +24,8 @@ const Home = () => {
         {service && <ServiceStats/>}
         {purchase && <PurchaseStats/>}
         {admin && <AdminStats/>}
+        {transac && <></>}
       </div>
-    
       <Login />
     </div>
   )

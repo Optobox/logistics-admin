@@ -1,24 +1,33 @@
-import { ActionIcon, Button, FileButton, NumberInput, TextInput } from '@mantine/core'
+import React from 'react'
+import { ActionIcon, Button, Checkbox, FileButton, Modal, NumberInput, TextInput } from '@mantine/core'
 import Compressor from 'compressorjs'
 import { doc, updateDoc } from 'firebase/firestore'
 import { deleteObject, ref } from 'firebase/storage'
-import React from 'react'
+import { useRouter } from 'next/router'
 import { AiFillDelete } from 'react-icons/ai'
 import { PermissionContext } from '../../layout/Layout'
 import { db, storage } from '../../utlis/firebase'
 import { uploadAndGetImage } from '../../utlis/upload'
-import { styles } from './ItemView'
+import { ItemContext, styles } from './ItemView'
 
-function ItemImages({ item, handleImageView, saveItem, urls, setUrls }) {
+import cn from 'classnames'
+
+function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmModal }) {
 
   const { manager, service, admin, purchase } = React.useContext(PermissionContext)
-
+  const { suggested, adopted, done } = React.useContext(ItemContext)
 
   const addUrl = () => {
-    setUrls([...urls, { link: '', cost: null, good: null, specs: null, extra: null }])
+    setUrls([...urls, { 
+      link: '', 
+      cost: null, 
+      good: null, 
+      specs: null, 
+      extra: null 
+    }])
   }
 
-  const  deleteFiles = async (name, index) => {
+  const deleteFiles = async (name, index) => {
     await deleteObject(ref(storage, `items/${item?.id}/${name}-${index}`)) 
     .then(async () => {
       const newUrls = urls.map((e, i) => {
@@ -45,7 +54,6 @@ function ItemImages({ item, handleImageView, saveItem, urls, setUrls }) {
   }
 
   const handleUrlChange = async (val, name, index) => {
-
     if (name === 'specs' || name === 'good' || name === 'extra') {
       const files = urls.map((e, i) => {
         if (i === index) {
@@ -80,7 +88,7 @@ function ItemImages({ item, handleImageView, saveItem, urls, setUrls }) {
 
     const newUrls = urls.map((e, i) => {
       if (i === index) {
-        return { ...e, [name]: val }
+        return { ...e, [name]: val}
       } else {
         return e
       }
@@ -89,201 +97,290 @@ function ItemImages({ item, handleImageView, saveItem, urls, setUrls }) {
     setUrls(newUrls)
   }
 
-  return (
-    <div>
-      {((!service || manager) && (service || !manager)) && (
-        
-        <>
-        {item?.urls?.map((e, i) => {
-          return (
-            <div className={styles.block} key={i}>
-              <p className={styles.label}>Стоимость - {i + 1}</p>
-              <p className={styles.value}>{e.cost} тг</p>
-              {e?.specs && (
-                <img src={e?.specs} alt="" className='w-24' onClick={() => handleImageView(e.specs)} />
-              )}
-              {e?.good && (
-                <img src={e?.good} alt="" className='w-24' onClick={() => handleImageView(e.good)} />
-              )}
-              {e?.extra && (
-                <img src={e?.extra} alt="" className='w-24' onClick={() => handleImageView(e.extra)} />
-              )}
-            </div>
-          )
-        })}
-      {(item?.status === 'suggested' || item?.status === 'done') &&
-        <>
-          {item?.urls?.map((e, i) => {
-            return (
-              <div key={i}>
-                <p className='flex items-center gap-4'>
-                  <span className='font-semibold w-24'>Ссылка:</span>
-                  {e.link}
-                </p>
-                <p className='flex items-center gap-4'>
-                  <span className='font-semibold w-24'>Стоимость:</span>
-                  {e.cost} тг
-                </p>
-                {e?.specs && (
-                  <p className='flex items-center gap-4'>
-                    <span className='font-semibold w-24'>Характеристика:</span>
-                    <img src={e.specs} className='w-24' onClick={() => handleImageView(e.specs)} alt="" />
-                  </p>
-                )}
-                {e?.good && (
-                  <p className='flex items-center gap-4'>
-                    <span className='font-semibold w-24'>Товар:</span>
-                    <img src={e.good} className='w-24' onClick={() => handleImageView(e.good)} alt="" />
-                  </p>
-                )}
-                {e?.extra && (
-                  <p className='flex items-center gap-4'>
-                    <span className='font-semibold w-24'>Доп:</span>
-                    <img src={e.extra} className='w-24' onClick={() => handleImageView(e.extra)} alt="" />
-                  </p>
-                )}
-              </div>
-            )
-          })}
-        </>
+  const router = useRouter()
+
+  const [isOrder] = React.useState(router.pathname.includes('/orders'))
+
+  const [modal, setModal] = React.useState({
+    value: false, 
+    src: null
+  })
+
+  const handleImageView = (url) => {
+    setModal({value: true, src: url})
+  }
+
+  const selectUrls = (val, index) => {
+    const newUrls = item?.urls?.map((e, i) => {
+      if (i === index) {
+        return { ...e, selected: val}
+      } else {
+        return e
       }
-      {item?.status === 'adopted' && (
-        <>
-          {urls?.map((e, i) => {
-            return (
-              <React.Fragment key={i}>
-                <div className='flex gap-4 items-center pr-6' key={i}>
-                  <TextInput
-                    className='w-full'
-                    value={e.link ?? ''}
-                    onChange={(v) => handleUrlChange(v.target.value, 'link', i)}
-                    name='link'
-                  />
-                  <NumberInput
-                    className='w-72'
-                    value={e.cost}
-                    onChange={(v) => handleUrlChange(v, 'cost', i)}
-                    name='cost'
-                    decimalSeparator='.'
-                  />
-                  {i >= 1 && (
-                    <ActionIcon
-                      color={'red'}
-                      variant='subtle'
-                      className='-mr-8 -ml-3'
-                      onClick={() => deleteUrl(i)}
-                    >
-                      <AiFillDelete />
-                    </ActionIcon>
-                  )}
-                </div>
-                <div className='flex justify-between'>
-                  <div>
-                      {urls?.[i]?.specs && (
-                        <div className='flex items-center'>
-                          <img 
-                            src={urls[i].specs} 
-                            alt="" 
-                            className='w-24 h-24' 
-                            onClick={() => handleImageView(e.specs)} 
+    })
+
+    setItem({...item, urls: newUrls})
+  }
+
+  return (
+    <>
+      <div className='p-4'>
+        {isOrder ? (
+          (!service || manager) && (service || !manager)) && (
+            <>
+              {(suggested || done) &&
+                <>
+                  {item?.urls?.map((e, i) => {
+                    return (
+                      <div key={i}>
+                        <p className='flex items-center gap-4'>
+                          <span className='font-semibold w-24'>Ссылка:</span>
+                          {e.link}
+                        </p>
+                        <p className='flex items-center gap-4'>
+                          <span className='font-semibold w-24'>Стоимость:</span>
+                          {e.cost} тг
+                        </p>
+                        {e?.specs && (
+                          <p className='flex items-center gap-4'>
+                            <span className='font-semibold w-24'>Характеристика:</span>
+                            <img 
+                              src={e.specs} 
+                              className='w-24' 
+                              onClick={() => handleImageView(e.specs)} 
+                              alt="" 
+                            />
+                          </p>
+                        )}
+                        {e?.good && (
+                          <p className='flex items-center gap-4'>
+                            <span className='font-semibold w-24'>Товар:</span>
+                            <img 
+                              src={e.good} 
+                              className='w-24' 
+                              onClick={() => handleImageView(e.good)} 
+                              alt="" 
+                            />
+                          </p>
+                        )}
+                        {e?.extra && (
+                          <p className='flex items-center gap-4'>
+                            <span className='font-semibold w-24'>Доп:</span>
+                            <img 
+                              src={e.extra} 
+                              className='w-24' 
+                              onClick={() => handleImageView(e.extra)} 
+                              alt="" 
+                            />
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </>}
+              {adopted && (
+                <>
+                  {urls?.map((e, i) => {
+                    return (
+                      <React.Fragment key={i}>
+                        <div className='flex gap-4 items-center pr-6' key={i}>
+                          <TextInput
+                            className='w-full'
+                            value={e.link ?? ''}
+                            onChange={(v) => handleUrlChange(v.target.value, 'link', i)}
+                            name='link'
                           />
-                          <Button
-                            compact 
-                            color={'red'} 
-                            variant={'subtle'} 
-                            onClick={() => deleteFiles('specs', i)}
-                          >
-                            удалить
-                          </Button>
-                        </div>
-                      )}
-                    <FileButton
-                      onChange={(e) => handleUrlChange(e, 'specs', i)} 
-                      compact 
-                      variant='subtle'
-                    >
-                      {(props) => <Button {...props}>добавить</Button>}
-                    </FileButton>
-                  </div>
-                  <div>
-                      {urls?.[i]?.good && (
-                        <div className='flex items-center'>
-                          <img 
-                            src={urls[i].good} 
-                            alt=""  
-                            className='w-24 h-24' 
-                            onClick={() => handleImageView(e.good)}
+                          <NumberInput
+                            className='w-72'
+                            value={e.cost}
+                            onChange={(v) => handleUrlChange(v, 'cost', i)}
+                            name='cost'
+                            decimalSeparator='.'
                           />
-                          <Button 
-                            compact 
-                            color={'red'} 
-                            variant={'subtle'} 
-                            onClick={() => deleteFiles('good', i)}
-                          >
-                            удалить
-                          </Button>
+                          {i >= 1 && (
+                            <ActionIcon
+                              color={'red'}
+                              variant='subtle'
+                              className='-mr-8 -ml-3'
+                              onClick={() => deleteUrl(i)}
+                            >
+                              <AiFillDelete />
+                            </ActionIcon>
+                          )}
                         </div>
-                      )}
-                    <FileButton 
-                      onChange={(e) => handleUrlChange(e, 'good', i)} 
-                      compact 
-                      variant='subtle'
-                    >
-                      {(props) => <Button {...props}>добавить</Button>}
-                    </FileButton>
-                  </div>
-                  <div>
-                      {urls?.[i]?.extra && (
-                        <div className='flex items-center'>
-                          <img 
-                            src={urls[i].extra} 
-                            alt=""  
-                            className='w-24 h-24' 
-                            onClick={() => handleImageView(e.extra)}
-                          />
-                          <Button 
-                            compact 
-                            color={'red'} 
-                            variant={'subtle'} 
-                            onClick={() => deleteFiles('extra', i)}
-                          >
-                            удалить
-                          </Button>
+                        <div className='flex justify-between'>
+                          <div>
+                            {urls?.[i]?.specs && (
+                              <div className='flex items-center'>
+                                <img 
+                                  src={urls[i].specs} 
+                                  alt="" 
+                                  className='w-24 h-24' 
+                                  onClick={() => handleImageView(e.specs)} 
+                                />
+                                <Button 
+                                  compact 
+                                  color={'red'} 
+                                  variant={'subtle'} 
+                                  onClick={() => deleteFiles('specs', i)}
+                                >
+                                  удалить
+                                </Button>
+                              </div>
+                            )}
+                            <FileButton 
+                              onChange={(e) => handleUrlChange(e, 'specs', i)} 
+                              compact 
+                              variant='subtle'
+                            >
+                              {(props) => <Button {...props}>добавить</Button>}
+                            </FileButton>
+                          </div>
+                          <div>
+                            {urls?.[i]?.good && (
+                              <div className='flex items-center'>
+                                <img 
+                                  src={urls[i].good} 
+                                  alt=""  
+                                  className='w-24 h-24' 
+                                  onClick={() => handleImageView(e.good)}
+                                />
+                                <Button 
+                                  compact 
+                                  color={'red'} 
+                                  variant={'subtle'} 
+                                  onClick={() => deleteFiles('good', i)}
+                                >
+                                  удалить
+                                </Button>
+                              </div>
+                            )}
+                            <FileButton 
+                              onChange={(e) => handleUrlChange(e, 'good', i)} 
+                              compact 
+                              variant='subtle'
+                            >
+                              {(props) => <Button {...props}>добавить</Button>}
+                            </FileButton>
+                          </div>
+                          <div>
+                            {urls?.[i]?.extra && (
+                              <div className='flex items-center'>
+                                <img 
+                                  src={urls[i].extra} 
+                                  alt=""  
+                                  className='w-24 h-24' 
+                                  onClick={() => handleImageView(e.extra)}
+                                />
+                                <Button 
+                                  compact 
+                                  color={'red'} 
+                                  variant={'subtle'} 
+                                  onClick={() => deleteFiles('extra', i)}
+                                >
+                                  удалить
+                                </Button>
+                              </div>
+                            )}
+                            <FileButton 
+                              onChange={(e) => handleUrlChange(e, 'extra', i)} 
+                              compact 
+                              variant='subtle'
+                            >
+                              {(props) => <Button {...props}>добавить</Button>}
+                            </FileButton>
+                          </div>
                         </div>
-                      )}
-                    <FileButton 
-                      onChange={(e) => handleUrlChange(e, 'extra', i)} 
-                      compact 
-                      variant='subtle'
-                    >
-                      {(props) => <Button {...props}>добавить</Button>}
-                    </FileButton>
+                      </React.Fragment>
+                    )
+                  })}
+                  <div className='flex justify-between gap-4'>
+                    <Button variant='subtle' compact onClick={addUrl}>
+                      Добавить еще
+                    </Button>
+                    <Button onClick={saveItem}>
+                      Сохранить
+                    </Button>
                   </div>
-                </div>
-              </React.Fragment>
-            )
-          })}
-          
-          <div className='flex justify-between gap-4'>
-            <Button variant='subtle' compact onClick={addUrl}>
-              Добавить еще
-            </Button>
-            <Button onClick={saveItem}>
-              Сохранить
-            </Button>
-          </div>
-   
-        </>
-      )}
-      {item?.status === 'waiting' && (
-        <div>
-          <p className='text-lg font-semibold mb-2'>Требуемые данные:</p>
-          <p>{item?.more_data}</p>
-        </div>
-      )}
-        </>
-      )}
-    </div>
+                  <Button
+                    color={'green'}
+                    className='mt-4 mb-6'
+                    onClick={() => confirmModal('Вы действительно хотите отправить заявку?', 'suggested', 'Отправить', sendItem)}
+                  >
+                    Отправить
+                  </Button>
+                </>
+              )}
+            </>
+          )
+          :
+          <>
+            {(suggested || done) && (
+              <>
+                {urls?.map((e, i) => {
+
+                  const disabled = urls?.some((q, index) => q?.selected === true && index !== i)
+
+                  return (
+                    <div 
+                      key={i}
+                      className={cn('flex gap-4 p-4 transition-all duration-150 rounded-lg', {
+                        'bg-slate-100': urls?.[i]?.selected
+                      })}
+                    >
+                      <div>
+                       <p className='mb-4 font-semibold ml-1'>{i + 1}</p>
+                       {suggested && (
+                        <Checkbox
+                          width={50}
+                          checked={urls?.[i]?.selected ?? false}
+                          onChange={(v) => selectUrls(v.currentTarget.checked, i)}
+                          disabled={disabled}
+                        />
+                       )}
+                      </div>
+                      <div className={`${styles.block} w-full`}>
+                        <div className='flex gap-4'>
+                          {e?.specs && (
+                            <img 
+                              src={e?.specs} 
+                              alt="" className='w-24' 
+                              onClick={() => handleImageView(e.specs)} 
+                            />
+                          )}
+                          {e?.good && (
+                            <img 
+                              src={e?.good} 
+                              alt="" className='w-24' 
+                              onClick={() => handleImageView(e.good)} 
+                            />
+                          )}
+                          {e?.extra && (
+                            <img 
+                              src={e?.extra} 
+                              alt="" className='w-24' 
+                              onClick={() => handleImageView(e.extra)} 
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </> 
+            )}
+          </>
+        }
+      </div>
+      <Modal
+        opened={modal.value}
+        onClose={() => setModal({...modal, value: false})}
+        centered
+        withCloseButton={false}
+      >
+        <img src={modal?.src} alt="" />
+      </Modal>
+    </>
   )
 }
 

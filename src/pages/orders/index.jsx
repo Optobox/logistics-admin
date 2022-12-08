@@ -1,34 +1,35 @@
 import { Tabs } from '@mantine/core'
-import { collection, query } from 'firebase/firestore'
 import React from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
-import { useCollectionData } from 'react-firebase-hooks/firestore'
 import ItemView from '../../components/item/ItemView'
-import { PermissionContext } from '../../layout/Layout'
-import { auth, db } from '../../utlis/firebase'
+import useAuth from '../../hooks/useAuth'
+import { DataContext, PermissionContext } from '../../layout/Layout'
 
 function Orders() {
 
-  const [values] = useCollectionData(query(collection(db, 'items')))
+  const {items} = React.useContext(DataContext)
 
   const {manager, service, logist, transac, admin} = React.useContext(PermissionContext)
 
-  const [user] = useAuthState(auth)
+  const {user} = useAuth()
 
-  const adopted = values?.filter((item => {
+  const adopted = items?.filter((item => {
     return (item?.status === 'adopted')
   }))
 
-  const suggested = values?.filter((item => {
+  const suggested = items?.filter((item => {
     return (item?.status === 'suggested') && ((item?.purchase_manager?.uid == user?.uid) || admin)
   }))
   
-  const waiting = values?.filter((item => {
+  const waiting = items?.filter((item => { 
     return (item?.status === 'waiting') && ((item?.purchase_manager?.uid == user?.uid) || admin)
   }))
 
-  const done = values?.filter((item => {
+  const done = items?.filter((item => {
     return (item?.status === 'done') && ((item?.purchase_manager?.uid == user?.uid) || admin)
+  }))
+
+  const ended = items?.filter((item => {
+    return (item?.status === 'ended') && ((item?.purchase_manager?.uid == user?.uid) || admin)
   }))
 
   if (transac || logist) return <></>
@@ -62,7 +63,7 @@ function Orders() {
           <ItemView values={done} />
         </Tabs.Panel>
         <Tabs.Panel value='Завершено' pt='md'>
-          <ItemView values={done} />
+          <ItemView values={ended} />
         </Tabs.Panel>
       </Tabs>
     </div>

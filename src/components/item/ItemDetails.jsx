@@ -1,19 +1,22 @@
 import React from 'react'
-import { ActionIcon, FileButton, NumberInput, Textarea, TextInput, Button, } from '@mantine/core'
+import { NumberInput, Textarea, TextInput } from '@mantine/core'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 
-import { styles } from './ItemView'
+import { ItemContext, styles } from './ItemView'
 
+function ItemDetails({ item, setItem }) {
 
-function ItemDetails({ item,  setItem }) {
+  const router = useRouter()
 
-  const router = useRouter().pathname
+  const {waiting, suggested, done, rejected, ended} = React.useContext(ItemContext)
 
-  const [isOrder] = React.useState(router.includes('/orders'))
+  const [isOrder] = React.useState(router.pathname.includes('/orders'))
+
+  const readOnly = (suggested || done || rejected || ended) || isOrder
 
   return (
-    <div className='space-y-2'>            
+    <div className='space-y-2 p-4 pt-0'>            
       <div className={styles.block}>
         <p className={styles.label}>Дата создания</p>
         <p className={styles.value}>{dayjs(item?.createdAt?.seconds * 1000).format('DD-MM-YYYY, HH:mm')}</p>
@@ -37,22 +40,28 @@ function ItemDetails({ item,  setItem }) {
             <p className={styles.label}>Номер телефона</p>
             <p className={styles.value}>{item?.tel}</p>
           </div>
-          <div className={styles.block}>
-            <p className={styles.label}>Whatsapp</p>
-            <p className={styles.value}>{item?.wh}</p>
-          </div>
-          <div className={styles.block}>
-            <p className={styles.label}>Telegram</p>
-            <p className={styles.value}>{item?.tg}</p>
-          </div>
-          <div className={styles.block}>
-            <p className={styles.label}>Instagram</p>
-            <p className={styles.value}>{item?.instagram}</p>
-          </div>
+          {item?.wh && (
+            <div className={styles.block}>
+              <p className={styles.label}>Whatsapp</p>
+              <p className={styles.value}>{item?.wh}</p>
+            </div>
+          )}
+          {item?.tg && (
+            <div className={styles.block}>
+              <p className={styles.label}>Telegram</p>
+              <p className={styles.value}>{item?.tg}</p>
+            </div>
+          )}
+          {item?.instagram && (
+            <div className={styles.block}>
+              <p className={styles.label}>Instagram</p>
+              <p className={styles.value}>{item?.instagram}</p>
+            </div>
+          )}
         </>
       )}
 
-      {item?.status === 'waiting' && (
+      {waiting && (
         <div className='pt-4 pb-2'>
           <p className='text-lg font-semibold mb-2'>Требуемые данные:</p>
           <p>{item?.more_data}</p>
@@ -85,7 +94,7 @@ function ItemDetails({ item,  setItem }) {
 
       <div className={styles.block}>
         <p className={styles.label}>Количество</p>
-        {(item?.status === 'suggested' || item?.status === 'done' || item?.status === 'rejected') || (isOrder) ?
+        {readOnly ?
           <p className={styles.value}>{item?.count}</p>
           :
           <TextInput
@@ -97,7 +106,7 @@ function ItemDetails({ item,  setItem }) {
       </div>
       <div className={styles.block}>
         <p className={styles.label}>Бюджет</p>
-        {(item?.status === 'suggested' || item?.status === 'done' || item?.status === 'rejected') || (isOrder) ?
+        {readOnly ?
           <p className={styles.value}>{item?.cost} тг</p>
           :
           <TextInput
@@ -110,7 +119,7 @@ function ItemDetails({ item,  setItem }) {
 
       <div className={styles.block}>
         <p className={styles.label}>Описание</p>
-        {(item?.status === 'suggested' || item?.status === 'done' || item?.status === 'rejected') || (isOrder) ?
+        {readOnly ?
           <p className={styles.value}>{item?.description}</p>
           :
           <Textarea
@@ -125,7 +134,7 @@ function ItemDetails({ item,  setItem }) {
       </div>
       <div className={styles.block}>
         <p className={styles.label}>Срок исполнения</p>
-        {(item?.status === 'suggested' || item?.status === 'done' || item?.status === 'rejected') || (isOrder) ?
+        {readOnly ?
           <p className={styles.value}>{item?.duration}</p>
           :
           <NumberInput
@@ -139,17 +148,6 @@ function ItemDetails({ item,  setItem }) {
           />
         }
       </div>
-      {/* {(item?.status === 'suggested' && !isOrder) && (
-        <>
-          <div className={styles.block}>
-            <p className={styles.label}>Полученная сумма</p>
-            <NumberInput
-              value={item?.our_cost ?? ''}
-              onChange={(q) => setItem({ ...item, our_cost: q })}
-            />
-          </div>
-        </>
-      )} */}
     </div>
   )
 }

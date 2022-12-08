@@ -1,8 +1,8 @@
 import { collection, query } from 'firebase/firestore'
 import React from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
-import { auth, db } from '../../utlis/firebase'
+import useAuth from '../../hooks/useAuth'
+import { db } from '../../utlis/firebase'
 import Cell from '../Cell'
 
 function ServiceStats() {
@@ -10,7 +10,7 @@ function ServiceStats() {
   const [consults] = useCollectionData(query(collection(db, 'consults')))
   const [items] = useCollectionData(query(collection(db, 'items')))
 
-  const [user] = useAuthState(auth)
+  const {user} = useAuth()
 
   const doneItems = items?.filter((e) => {
     return (e.status === 'done') && e.service_manager?.uid == user?.uid
@@ -27,24 +27,24 @@ function ServiceStats() {
   return (
     <div className='grid grid-cols-2 gap-4 max-w-lg'>
       <Cell 
-        label='Консультации'
-        value={doneConsult?.length} 
-        def='Проведено' 
+        // label='Консультации'
+        // value={doneConsult?.length} 
+        // def='Проведено' 
       />
       <Cell 
-        label='Заявки'
-        value={doneItems?.length} 
-        def='Проведено' 
+        // label='Заявки'
+        // value={doneItems?.length} 
+        // def='Проведено' 
       />
       <Cell 
-        label='Заявки'
-        value={suggestedItems?.length} 
-        def='Предложенные' 
+        // label='Заявки'
+        // value={suggestedItems?.length} 
+        // def='Предложенные' 
       />
       <Cell 
-        label='Доход'
-        value={0} 
-        def='тенге' 
+        // label='Доход'
+        // value={0} 
+        // def='тенге' 
       />
     </div>
   )

@@ -1,21 +1,18 @@
 import React from 'react'
-import { ActionIcon, Button, NumberInput, Textarea, TextInput, FileButton, Modal, Collapse } from '@mantine/core'
-import { useAuthState } from 'react-firebase-hooks/auth'
-import { auth, db, storage } from '../../utlis/firebase'
+import { Button, NumberInput, Textarea, TextInput, Collapse } from '@mantine/core'
+import { db, storage } from '../../utlis/firebase'
 
-import dayjs from 'dayjs'
 import { doc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { openConfirmModal } from '@mantine/modals'
 import { showNotification } from '@mantine/notifications'
 
-import { AiFillDelete } from 'react-icons/ai'
 import { PermissionContext } from '../../layout/Layout'
-import { uploadAndGetImage } from '../../utlis/upload'
 import { deleteObject, ref } from 'firebase/storage'
-import Compressor from 'compressorjs'
 import ItemBody from './ItemBody'
 import { useRouter } from 'next/router'
 import ItemDetails from './ItemDetails'
+import useAuth from '../../hooks/useAuth'
+import ItemImages from './ItemImages'
 
 export const styles = {
   block: 'grid grid-cols-[30%_auto]',
@@ -23,11 +20,13 @@ export const styles = {
   value: 'font-semibold'
 }
 
+export const ItemContext = React.createContext(null)
+
 function ItemView({ values = [] }) {
 
-  const { manager, service, admin, purchase } = React.useContext(PermissionContext)
+  const { manager, service, admin, purchase, tarif } = React.useContext(PermissionContext)
 
-  const [user] = useAuthState(auth)
+  const {user} = useAuth()
 
   const [item, setItem] = React.useState({})
   const [selected, setSelected] = React.useState(null)
@@ -36,6 +35,15 @@ function ItemView({ values = [] }) {
     setSelected(id)
     setItem(item)
   }
+
+  const suggested = item?.status === 'suggested'
+  const raw = item?.status === 'raw'
+  const adopted = item?.status === 'adopted'
+  const done = item?.status === 'done'
+  const ended = item?.status === 'ended'
+  const rejected = item?.status === 'rejected'
+  const waiting = item?.status === 'waiting'
+
 
   const confirmModal = (message, status, confirmLabel, callback, cancelLabel = 'Нет') => openConfirmModal({
     title: 'Подтвердите действие',
@@ -62,6 +70,8 @@ function ItemView({ values = [] }) {
         name: user?.displayName,
         email: user?.email,
       },
+      service_tarif: tarif.service_manager,
+      purchase_tarif: tarif.purchase_manager,
       status: status,
       updatedAt: serverTimestamp(),
     })
@@ -72,7 +82,7 @@ function ItemView({ values = [] }) {
       console.log(err, 'err');
     })
   }
-  
+
   const sendItem = async (status) => {
     await updateDoc(doc(db, 'items', item?.id), {
       ...item,
@@ -120,6 +130,8 @@ function ItemView({ values = [] }) {
       urls: (urls && [...urls]) ?? null,
       same: true,
       status: status,
+      service_tarif: tarif.service_manager,
+      purchase_tarif: 0,
       updatedAt: serverTimestamp(),
     })
     .then((e) => {
@@ -167,6 +179,8 @@ function ItemView({ values = [] }) {
       status: status,
       restored: true,
       updatedAt: serverTimestamp(),
+      service_tarif: null,
+      purchase_tarif: null,
     })
     .then((e) => {
       clearItem()
@@ -199,7 +213,7 @@ function ItemView({ values = [] }) {
   const concludeItem = async (status) => {
     await updateDoc(doc(db, 'items', item?.id), {
       ...item,
-      our_cost: item?.our_cost,
+      recieved_sum: item?.recieved_sum,
       status: status,
       updatedAt: serverTimestamp(),
     })
@@ -214,9 +228,10 @@ function ItemView({ values = [] }) {
   const endItem = async (status) => {
     await updateDoc(doc(db, 'items', item?.id), {
       ...item,
-      our_cost: item?.our_cost,
+      recieved_sum: item?.recieved_sum,
       status: status,
       updatedAt: serverTimestamp(),
+      endedAt: serverTimestamp()
     })
     .then((e) => {
       clearItem()
@@ -269,118 +284,28 @@ function ItemView({ values = [] }) {
     extra: null
   }])
 
-  React.useEffect(() => {
-    if (!item?.urls) return setUrls([{ link: '', cost: null, specs: null, good: null, extra: null }])
-    setUrls(item?.urls)
-  }, [item])
 
   React.useEffect(() => {
     if (item?.urls) {
       setUrls(item?.urls)
+    } else {
+      setUrls([{ link: '', cost: null, specs: null, good: null, extra: null }])
     }
   }, [item?.urls])
 
-  const handleUrlChange = async (val, name, index) => {
-    if (name === 'specs' || name === 'good' || name === 'extra') {
-      const files = urls.map((e, i) => {
-        if (i === index) {
-          return { ...e, [name]: val }
-        } else {
-          return e
-        }
-      })
-      new Compressor(val, {
-        quality: 0.6,
-        async success(file) {
-          await uploadAndGetImage(`items/${item?.id}/${name}-${index}`, file)
-          .then((async e => {
-            if (name === 'specs') {
-              files[index].specs = e
-            } 
-            if (name === 'good') {
-              files[index].good = e
-            } 
-            if (name === 'extra') {
-              files[index].extra = e
-            } 
-            setUrls(files)
-            await updateDoc(doc(db, 'items', item?.id), {
-              urls: files
-            })
-          }))
-        } 
-      })
-      return  
-    }
-
-    const newUrls = urls.map((e, i) => {
-      if (i === index) {
-        return { ...e, [name]: val }
-      } else {
-        return e
-      }
-    })
-
-    setUrls(newUrls)
-  }
-
-  const  deleteFiles = async (name, index) => {
-    await deleteObject(ref(storage, `items/${item?.id}/${name}-${index}`)) 
-    .then(async () => {
-      const newUrls = urls.map((e, i) => {
-        if (i === index) {
-          return { ...e, [name]: null}
-        } else {
-          return e
-        }
-      })
-      await updateDoc(doc(db, 'items', item?.id), {
-        urls: newUrls
-      })
-      .then(() => {
-        setUrls(newUrls)
-      })
-    })
-  }
-
-  const addUrl = () => {
-    setUrls([...urls, { link: '', cost: null, good: null, specs: null, extra: null }])
-  }
-
-  const deleteUrl = (i) => {
-    setUrls(q => q.filter((_, index) => {
-      return index !== i
-    })
-    )
-  }
-
-  const [modal, setModal] = React.useState({
-    value: false, 
-    src: null
-  })
-
-  const handleImageView = (url) => {
-    setModal({value: true, src: url})
-  }
-
   const [again, setAgain] = React.useState(false)
 
-  const [newItem, setNewItem] = React.useState({
-    cost: null, 
-    count: null, 
-    description: null, 
-    duration: null
-  })
+  const [newItem, setNewItem] = React.useState({})
 
-  React.useEffect(() => {
+  const reAdopt = () => {
     setNewItem({
       cost: item?.cost, 
       count: item?.count, 
       description: item?.description, 
       duration: item?.duration
     })
-    setAgain(false)
-  }, [item])
+    setAgain(true)
+  }
 
   const router = useRouter().pathname
 
@@ -388,232 +313,34 @@ function ItemView({ values = [] }) {
 
   return (
     <>
-      <div className='grid grid-cols-1 lg:grid-cols-[60%_auto]'>
-        <ItemBody 
-          values={values} 
-          handleSelected={handleSelected} 
-          selected={selected} 
-        />
-        {selected && (
-          <div>
-            <ItemDetails  
-              item={item}
-              setItem={setItem}
-            />
-            {isOrder ? 
-              <form className='border p-4 space-y-4'>
-                <div className='space-y-2'>
-                  {/* <div className={styles.block}>
-                    <p className={styles.label}>Дата создания</p>
-                    <p className={styles.value}>{dayjs(item?.createdAt?.seconds * 1000).format('DD-MM-YYYY, HH:mm')}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Срок исполнения:</p>
-                    <p className={styles.value}>{item?.duration}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Вид заказа</p>
-                    <p className={styles.value}>{item?.app}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Приоритет</p>
-                    <p className={styles.value}>{item?.priority ? item?.priority : 'Тендер'}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Название</p>
-                    <p className={styles.value}>{item?.title}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Категория</p>
-                    <p className={styles.value}>{item?.category}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Тип</p>
-                    <p className={styles.value}>{item?.type}</p>
-                  </div>
-
-                  <div className={styles.block}>
-                    <p className={styles.label}>Количество</p>
-                    <p className={styles.value}>{item?.count ?? ''}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Бюджет</p>
-                    <p className={styles.value}>{item?.cost ?? ''} тг</p>
-                  </div>
-
-                  <div className={styles.block}>
-                    <p className={styles.label}>Описание</p>
-                    <p className={styles.value}>{item?.description ?? ''} </p>
-                  </div> */}
-                  {((!service || manager) && (service || !manager)) && (
-                    <>
-                      {(item?.status === 'suggested' || item?.status === 'done') &&
-                        <>
-                          {item?.urls?.map((e, i) => {
-                            return (
-                              <div key={i}>
-                                <p className='flex items-center gap-4'>
-                                  <span className='font-semibold w-24'>Ссылка:</span>
-                                  {e.link}
-                                </p>
-                                <p className='flex items-center gap-4'>
-                                  <span className='font-semibold w-24'>Стоимость:</span>
-                                  {e.cost} тг
-                                </p>
-                                {e?.specs && (
-                                  <p className='flex items-center gap-4'>
-                                    <span className='font-semibold w-24'>Характеристика:</span>
-                                    <img src={e.specs} className='w-24' onClick={() => handleImageView(e.specs)} alt="" />
-                                  </p>
-                                )}
-                                {e?.good && (
-                                  <p className='flex items-center gap-4'>
-                                    <span className='font-semibold w-24'>Товар:</span>
-                                    <img src={e.good} className='w-24' onClick={() => handleImageView(e.good)} alt="" />
-                                  </p>
-                                )}
-                                {e?.extra && (
-                                  <p className='flex items-center gap-4'>
-                                    <span className='font-semibold w-24'>Доп:</span>
-                                    <img src={e.extra} className='w-24' onClick={() => handleImageView(e.extra)} alt="" />
-                                  </p>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </>}
-                      {item?.status === 'adopted' && (
-                        <>
-                          {urls?.map((e, i) => {
-                            return (
-                              <React.Fragment key={i}>
-                                <div className='flex gap-4 items-center pr-6' key={i}>
-                                  <TextInput
-                                    className='w-full'
-                                    value={e.link ?? ''}
-                                    onChange={(v) => handleUrlChange(v.target.value, 'link', i)}
-                                    name='link'
-                                  />
-                                  <NumberInput
-                                    className='w-72'
-                                    value={e.cost}
-                                    onChange={(v) => handleUrlChange(v, 'cost', i)}
-                                    name='cost'
-                                    decimalSeparator='.'
-                                  />
-                                  {i >= 1 && (
-                                    <ActionIcon
-                                      color={'red'}
-                                      variant='subtle'
-                                      className='-mr-8 -ml-3'
-                                      onClick={() => deleteUrl(i)}
-                                    >
-                                      <AiFillDelete />
-                                    </ActionIcon>
-                                  )}
-                                </div>
-                                <div className='flex justify-between'>
-                                  <div>
-                                      {urls?.[i]?.specs && (
-                                        <div className='flex items-center'>
-                                          <img 
-                                            src={urls[i].specs} 
-                                            alt="" 
-                                            className='w-24 h-24' 
-                                            onClick={() => handleImageView(e.specs)} 
-                                          />
-                                          <Button 
-                                            compact 
-                                            color={'red'} 
-                                            variant={'subtle'} 
-                                            onClick={() => deleteFiles('specs', i)}
-                                          >
-                                            удалить
-                                          </Button>
-                                        </div>
-                                      )}
-                                    <FileButton 
-                                      onChange={(e) => handleUrlChange(e, 'specs', i)} 
-                                      compact 
-                                      variant='subtle'
-                                    >
-                                      {(props) => <Button {...props}>добавить</Button>}
-                                    </FileButton>
-                                  </div>
-                                  <div>
-                                      {urls?.[i]?.good && (
-                                        <div className='flex items-center'>
-                                          <img 
-                                            src={urls[i].good} 
-                                            alt=""  
-                                            className='w-24 h-24' 
-                                            onClick={() => handleImageView(e.good)}
-                                          />
-                                          <Button 
-                                            compact 
-                                            color={'red'} 
-                                            variant={'subtle'} 
-                                            onClick={() => deleteFiles('good', i)}
-                                          >
-                                            удалить
-                                          </Button>
-                                        </div>
-                                      )}
-                                    <FileButton 
-                                      onChange={(e) => handleUrlChange(e, 'good', i)} 
-                                      compact 
-                                      variant='subtle'
-                                    >
-                                      {(props) => <Button {...props}>добавить</Button>}
-                                    </FileButton>
-                                  </div>
-                                  <div>
-                                      {urls?.[i]?.extra && (
-                                        <div className='flex items-center'>
-                                          <img 
-                                            src={urls[i].extra} 
-                                            alt=""  
-                                            className='w-24 h-24' 
-                                            onClick={() => handleImageView(e.extra)}
-                                          />
-                                          <Button 
-                                            compact 
-                                            color={'red'} 
-                                            variant={'subtle'} 
-                                            onClick={() => deleteFiles('extra', i)}
-                                          >
-                                            удалить
-                                          </Button>
-                                        </div>
-                                      )}
-                                    <FileButton 
-                                      onChange={(e) => handleUrlChange(e, 'extra', i)} 
-                                      compact 
-                                      variant='subtle'
-                                    >
-                                      {(props) => <Button {...props}>добавить</Button>}
-                                    </FileButton>
-                                  </div>
-                                </div>
-                              </React.Fragment>
-                            )
-                          })}
-                          
-                          <div className='flex justify-between gap-4'>
-                            <Button variant='subtle' compact onClick={addUrl}>
-                              Добавить еще
-                            </Button>
-                            <Button onClick={saveItem}>
-                              Сохранить
-                            </Button>
-                          </div>
-                          <Button
-                            color={'green'}
-                            className='mt-4'
-                            onClick={() => confirmModal('Вы действительно хотите отправить заявку?', 'suggested', 'Отправить', sendItem)}
-                          >
-                            Отправить
-                          </Button>
+      <ItemContext.Provider value={{suggested, adopted, raw, waiting, ended, done, rejected}}>
+        <div className='grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full'>
+          <ItemBody 
+            values={values} 
+            handleSelected={handleSelected} 
+            selected={selected} 
+          />
+          {selected && (
+            <div>
+              <ItemDetails  
+                item={item}
+                setItem={setItem}
+              />
+              <ItemImages
+                item={item}
+                setItem={setItem}
+                saveItem={saveItem}
+                urls={urls}
+                setUrls={setUrls}
+                sendItem={sendItem}
+                confirmModal={confirmModal}
+              />
+              {isOrder ? 
+                <form className='border p-4 space-y-4'>
+                  <div className='space-y-2'>
+                    {((!service || manager) && (service || !manager)) && (
+                      <>
+                        {adopted && (
                           <div className='space-y-4'>
                             <Textarea
                               value={item?.more_data ?? ''}
@@ -626,184 +353,40 @@ function ItemView({ values = [] }) {
                               Больще данных
                             </Button>
                           </div>
-                        </>
-                      )}
-                      {item?.status === 'waiting' && (
-                        <div>
-                          <p className='text-lg font-semibold mb-2'>Требуемые данные:</p>
-                          <p>{item?.more_data}</p>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </form>
-            :
-              <form className='border p-4 space-y-4'>
-                <div className='space-y-2'>
-                  {/* <div className={styles.block}>
-                    <p className={styles.label}>Дата создания</p>
-                    <p className={styles.value}>{dayjs(item?.createdAt?.seconds * 1000).format('DD-MM-YYYY, HH:mm')}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Время связи</p>
-                    <p className={styles.value}>{`${item?.when?.[0]} ${item?.when?.[1]}`}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Имя:</p>
-                    <p className={styles.value}>{item?.name}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Город</p>
-                    <p className={styles.value}>{item?.city}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Номер телефона</p>
-                    <p className={styles.value}>{item?.tel}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Whatsapp</p>
-                    <p className={styles.value}>{item?.wh}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Telegram</p>
-                    <p className={styles.value}>{item?.tg}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Instagram</p>
-                    <p className={styles.value}>{item?.instagram}</p>
-                  </div>
-
-                  {item?.status === 'waiting' && (
-                    <div className='pt-4 pb-2'>
-                      <p className='text-lg font-semibold mb-2'>Требуемые данные:</p>
-                      <p>{item?.more_data}</p>
-                    </div>
-                  )}
-
-                  <div className={styles.block}>
-                    <p className={styles.label}>Вид заказа</p>
-                    <p className={styles.value}>{item?.app}</p>
-                  </div>
-
-                  <div className={styles.block}>
-                    <p className={styles.label}>Приоритет</p>
-                    <p className={styles.value}>{item?.priority ? item?.priority : 'Тендер'}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Название</p>
-                    <p className={styles.value}>{item?.title}</p>
-                  </div>
-
-                  <div className={styles.block}>
-                    <p className={styles.label}>Категория</p>
-                    <p className={styles.value}>{item?.category}</p>
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Тип</p>
-                    <p className={styles.value}>{item?.type}</p>
-                  </div>
-
-                  <div className={styles.block}>
-                    <p className={styles.label}>Количество</p>
-                    {(item?.status === 'suggested' || item?.status === 'done' || item?.status === 'rejected') ?
-                      <p className={styles.value}>{item?.count}</p>
-                      :
-                      <TextInput
-                        value={item?.count ?? ''}
-                        name='count'
-                        onChange={(q) => setItem({ ...item, count: q.target.value })}
-                      />
-                    }
-                  </div>
-                  <div className={styles.block}>
-                    <p className={styles.label}>Бюджет</p>
-                    {(item?.status === 'suggested' || item?.status === 'done' || item?.status === 'rejected') ?
-                      <p className={styles.value}>{item?.cost} тг</p>
-                      :
-                      <TextInput
-                        value={item?.cost ?? ''}
-                        name='cost'
-                        onChange={(q) => setItem({ ...item, cost: q.target.value })}
-                      />
-                    }
-                  </div>
-
-                  <div className={styles.block}>
-                    <p className={styles.label}>Описание</p>
-                    {(item?.status === 'suggested' || item?.status === 'done' || item?.status === 'rejected') ?
-                      <p className={styles.value}>{item?.description}</p>
-                      :
-                      <Textarea
-                        value={item?.description ?? ''}
-                        name='description'
-                        onChange={(q) => setItem({ ...item, description: q.target.value })}
-                        classNames={{
-                          input: 'h-44'
-                        }}
-                      />
-                    }
-                  </div>
-                    <div className={styles.block}>
-                      <p className={styles.label}>Срок исполнения</p>
-                      {(item?.status === 'suggested' || item?.status === 'done' || item?.status === 'rejected') ?
-                        <p className={styles.value}>{item?.duration}</p>
-                        :
-                        <NumberInput
-                          value={item?.duration ?? ''}
-                          name='duration'
-                          onChange={(q) => setItem({ ...item, duration: q })}
-                          rightSection='дней'
-                          classNames={{
-                            rightSection: 'mr-4'
-                          }}
-                        />
-                      }
-                    </div> */}
-                    {item?.status === 'suggested' && (
-                      <>
-                        {item?.urls?.map((e, i) => {
-                          return (
-                            <div className={styles.block} key={i}>
-                              <p className={styles.label}>Стоимость - {i + 1}</p>
-                              <p className={styles.value}>{e.cost} тг</p>
-                              {e?.specs && (
-                                <img src={e?.specs} alt="" className='w-24' onClick={() => handleImageView(e.specs)} />
-                              )}
-                              {e?.good && (
-                                <img src={e?.good} alt="" className='w-24' onClick={() => handleImageView(e.good)} />
-                              )}
-                              {e?.extra && (
-                                <img src={e?.extra} alt="" className='w-24' onClick={() => handleImageView(e.extra)} />
-                              )}
-                            </div>
-                          )
-                        })}
-                        <div className={styles.block}>
-                          <p className={styles.label}>Полученная сумма</p>
-                          <NumberInput
-                            value={item?.our_cost ?? ''}
-                            onChange={(q) => setItem({ ...item, our_cost: q })}
-                          />
-                        </div>
+                        )}
+                        {waiting && (
+                          <div>
+                            <p className='text-lg font-semibold mb-2'>Требуемые данные:</p>
+                            <p>{item?.more_data}</p>
+                          </div>
+                        )}
                       </>
                     )}
-                    {item?.status === 'done' && (
-                        <Button
-                          color={'green'}
-                          px={30}
-                          onClick={() => confirmModal('Вы действительно хотите завершить заявку?', 'ended', 'Подтвердить', endItem)}
-                        >
-                          Завершить
-                        </Button>
+                  </div>
+                </form>
+              :
+                <form className='border p-4 space-y-4'>
+                  <div className='space-y-2'>
+                    {suggested && (
+                      <div className={styles.block}>
+                        <p className={styles.label}>Полученная сумма</p>
+                        <NumberInput
+                          value={item?.recieved_sum ?? ''}
+                          onChange={(q) => setItem({ ...item, recieved_sum: q })}
+                        />
+                      </div>
                     )}
-                    {/* <div>
-                      <Button onClick={saveItem}>
-                        Сохранить
+                    {done && (
+                      <Button
+                        color={'green'}
+                        px={30}
+                        onClick={() => confirmModal('Вы действительно хотите завершить заявку?', 'ended', 'Подтвердить', endItem)}
+                      >
+                        Завершить
                       </Button>
-                    </div> */}
+                    )}
                     <div className='space-x-4'>
-                      {item?.status === 'waiting' && (
+                      {waiting && (
                         <Button
                           color={'green'}
                           px={30}
@@ -812,17 +395,17 @@ function ItemView({ values = [] }) {
                           Принять
                         </Button>
                       )}
-                      {item?.status === 'suggested' && (
+                      {suggested && (
                         <Button
                           color={'green'}
                           px={30}
                           onClick={() => confirmModal('Вы действительно хотите заключить заявку?', 'done', 'Подтвердить', concludeItem)}
-                          disabled={again || !item?.our_cost}
+                          disabled={again || !item?.recieved_sum}
                         >
                           Заключить
                         </Button>
                       )}
-                      {item?.status === 'raw' && (
+                      {raw && (
                         <>
                           <Button
                             color={'green'}
@@ -841,7 +424,7 @@ function ItemView({ values = [] }) {
                           </Button>
                         </>
                       )}
-                      {(admin && (item?.status === 'rejected')) && (
+                      {(admin && rejected) && (
                         <Button 
                           color={'green'} 
                           variant={'outline'} 
@@ -850,21 +433,21 @@ function ItemView({ values = [] }) {
                           Восстановить
                         </Button>
                       )}
-                      {((item?.status === 'raw') || (item?.status === 'adopted') || (item?.status === 'suggested') || (item?.status === 'waiting')) && (
+                      {(raw || adopted || suggested || waiting) && (
                         <Button 
                           color={'red'} 
                           variant={'outline'} 
-                          px={30} onClick={() => rejectModal('Вы действительно хотите принять заявку?', 'rejected', 'Отклонить')}
+                          px={30} onClick={() => rejectModal('Вы действительно хотите принять заявку?', 'rejected', 'Отклонить', rejectItem)}
                         >
                           Отклонить
                         </Button>
                       )}
                         
-                      {item?.status === 'suggested' && (
+                      {suggested && (
                         <Button
                           color={'yellow'}
                           px={30}
-                          onClick={() => setAgain(true)}
+                          onClick={reAdopt}
                           variant='subtle'
                         >
                           Переподача
@@ -932,21 +515,13 @@ function ItemView({ values = [] }) {
                         </div>
                       </div>
                     </Collapse>
-                </div>
-              </form>
-            }
-          
-          </div>
-        )}
-      </div>
-      <Modal
-        opened={modal.value}
-        onClose={() => setModal({...modal, value: false})}
-        centered
-        withCloseButton={false}
-      >
-        <img src={modal?.src} alt="" />
-      </Modal>
+                  </div>
+                </form>
+              }
+            </div>
+          )}
+        </div>
+      </ItemContext.Provider>
     </>
   )
 }

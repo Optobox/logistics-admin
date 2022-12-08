@@ -3,8 +3,12 @@ import { Tabs, TextInput, Select, PasswordInput, Button, Table } from '@mantine/
 import { firebaseAdmin } from '../../utlis/firebasdAdmin'
 import { ChangeManagerPassword, CreateManager, ManagersTable } from '../../components/managers'
 import dayjs from 'dayjs'
+import AllManagerStats from '../../components/managers/AllManagerStats'
+import { PermissionContext } from '../../layout/Layout'
 
 function Managers({users}) {
+
+  const {admin, manager} = React.useContext(PermissionContext)
 
   const managers = users?.filter(e => {
     return e.email?.includes('optobox')
@@ -18,6 +22,8 @@ function Managers({users}) {
     if (role.includes('manager')) return 'Главный менеджер'
   }
 
+  if (!admin || !manager) return <></>
+
   return (
     <div className='w-full pb-24'>
       <Tabs
@@ -29,7 +35,7 @@ function Managers({users}) {
         >
         <Tabs.List>
           <Tabs.Tab value='Управление'>Управление</Tabs.Tab>
-          <Tabs.Tab value='Статистика'>Статистика</Tabs.Tab>
+          <Tabs.Tab value='Статистика' disabled={manager}>Статистика</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value='Управление' pt='md'>
           <div className='space-y-4'>
@@ -69,6 +75,7 @@ function Managers({users}) {
           </div>
         </Tabs.Panel>
         <Tabs.Panel value='Статистика' pt='md'>
+          <AllManagerStats managers={managers} />
         </Tabs.Panel>
       </Tabs>
     </div>

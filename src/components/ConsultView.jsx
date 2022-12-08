@@ -1,13 +1,13 @@
 import React from 'react'
-import { Button, NumberInput, Table, Tabs, Textarea } from '@mantine/core'
-import { auth, db } from '../utlis/firebase'
-import { useAuthState } from 'react-firebase-hooks/auth'
+import { Button, Table, Textarea } from '@mantine/core'
+import { db } from '../utlis/firebase'
 
 import { openConfirmModal } from '@mantine/modals'
 
 import cn from 'classnames'
 import dayjs from 'dayjs'
 import { doc, serverTimestamp, updateDoc } from 'firebase/firestore'
+import useAuth from '../hooks/useAuth'
 
 const styles = {
   block: 'grid grid-cols-[30%_auto]',
@@ -24,7 +24,7 @@ function ConsultView({values = []}) {
     setSelected(id)
     setConsult(item)
   }
-
+  const {user} = useAuth()
 
   const confirmModal = () => openConfirmModal({
     title: 'Подтвердите действие',
@@ -89,7 +89,6 @@ function ConsultView({values = []}) {
       })
   }
 
-  const [user] = useAuthState(auth)
 
   return (
     <div className='grid grid-cols-[60%_auto]'>
