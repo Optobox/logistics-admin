@@ -6,7 +6,7 @@ import cn from 'classnames'
 import { styles } from '../item/ItemView'
 import dayjs from 'dayjs'
 
-function DeliveryNotes() {
+function DeliveryNotes({lastElements, className, disabled}) {
 
   const {tracks} = React.useContext(DataContext)
 
@@ -23,7 +23,8 @@ function DeliveryNotes() {
   }
 
   return (
-    <div className='grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full'>
+    <div 
+      className={cn('grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full', className)}>
       <Table className='h-min'>
         <thead>
           <tr>
@@ -34,20 +35,21 @@ function DeliveryNotes() {
             <th>Прибыль</th>
             <th>Логист доход</th>
             <th>Opto прибыль</th>
-            <th>Дата</th>
+            <th>Дата завершения</th>
           </tr>
         </thead>
         <tbody>
           {values?.map((e, i) => {
 
-            const prib = (Number(e?.weight) * Number(e?.our_cost)); 
+            const prib = (Number(e.weight ?? 0) * Number(e.our_cost ?? 0.5) + (Number(e.cube ?? 0) * Number(e.our_cube ?? 30)))
 
             const logistPrib = (prib * e?.logist_tarif) / 100
             const optoPrib = prib - logistPrib
+            const endedAt = dayjs(e.endedAt?.seconds * 1000).format('DD-MM-YYYY, HH:mm')
 
             return (
               <tr
-                ke y={i}
+                key={i}
                 onClick={() => handleSelected(e?.id, e)}
                 className={cn('transition-all duration-200', {
                   'bg-slate-100': selected == e?.id,
@@ -60,13 +62,13 @@ function DeliveryNotes() {
                 <td>{prib}</td>
                 <td>{logistPrib}</td>
                 <td>{optoPrib}</td>
-                <td>{optoPrib}</td>
+                {/* <td>{endedAt}</td> */}
               </tr>
             )
-          })}
+          })?.slice(lastElements ? lastElements : 0)}
         </tbody>
       </Table>
-      {selected && (
+      {(selected && !disabled) && (
         <div className='space-y-4 border p-4'>
           <div className={styles.block}>
             <p className={styles.label}>Дата создания:</p>

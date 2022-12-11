@@ -43,7 +43,7 @@ function ItemView({ values = [] }) {
   const ended = item?.status === 'ended'
   const rejected = item?.status === 'rejected'
   const waiting = item?.status === 'waiting'
-
+  const same = item?.same
 
   const confirmModal = (message, status, confirmLabel, callback, cancelLabel = 'Нет') => openConfirmModal({
     title: 'Подтвердите действие',
@@ -313,7 +313,7 @@ function ItemView({ values = [] }) {
 
   return (
     <>
-      <ItemContext.Provider value={{suggested, adopted, raw, waiting, ended, done, rejected}}>
+      <ItemContext.Provider value={{suggested, adopted, raw, waiting, ended, done, rejected, same}}>
         <div className='grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full'>
           <ItemBody 
             values={values} 
@@ -415,6 +415,7 @@ function ItemView({ values = [] }) {
                           >
                             Принять
                           </Button>
+                        {!same && (
                           <Button
                             color={'green'}
                             px={30}
@@ -422,6 +423,7 @@ function ItemView({ values = [] }) {
                           >
                             Похожий заказ
                           </Button>
+                        )}
                         </>
                       )}
                       {(admin && rejected) && (

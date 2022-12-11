@@ -16,7 +16,7 @@ function ItemDetails({ item, setItem }) {
   const readOnly = (suggested || done || rejected || ended) || isOrder
 
   return (
-    <div className='space-y-2 p-4 pt-0'>            
+    <div className='space-y-2 p-4  dark:text-gray-300'>            
       <div className={styles.block}>
         <p className={styles.label}>Дата создания</p>
         <p className={styles.value}>{dayjs(item?.createdAt?.seconds * 1000).format('DD-MM-YYYY, HH:mm')}</p>
@@ -101,6 +101,9 @@ function ItemDetails({ item, setItem }) {
             value={item?.count ?? ''}
             name='count'
             onChange={(q) => setItem({ ...item, count: q.target.value })}
+            classNames={{
+              input: 'bg-gray-100'
+            }}
           />
         }
       </div>
@@ -113,6 +116,9 @@ function ItemDetails({ item, setItem }) {
             value={item?.cost ?? ''}
             name='cost'
             onChange={(q) => setItem({ ...item, cost: q.target.value })}
+            classNames={{
+              input: 'bg-gray-100'
+            }}
           />
         }
       </div>
@@ -127,7 +133,7 @@ function ItemDetails({ item, setItem }) {
             name='description'
             onChange={(q) => setItem({ ...item, description: q.target.value })}
             classNames={{
-              input: 'h-44'
+              input: 'h-44 bg-gray-100'
             }}
           />
         }
@@ -143,7 +149,7 @@ function ItemDetails({ item, setItem }) {
             onChange={(q) => setItem({ ...item, duration: q })}
             rightSection='дней'
             classNames={{
-              rightSection: 'mr-4'
+              rightSection: 'mr-4 bg-gray-100'
             }}
           />
         }

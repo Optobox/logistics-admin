@@ -1,15 +1,11 @@
+import React from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { collection, doc, query } from 'firebase/firestore'
-import React from 'react'
 import { useCollectionData, useDocumentData } from 'react-firebase-hooks/firestore'
 import useAuth from '../hooks/useAuth'
 import { auth, db } from '../utlis/firebase'
 import Header from './Header'
 import Sidebar from './Sidebar'
-
-const styles = {
-  wrapper: 'grid grid-rows-[auto_1fr] min-h-screen',
-}
 
 export const PermissionContext = React.createContext(null)
 
@@ -20,7 +16,7 @@ function Layout({ children }) {
   const {user} = useAuth()
   const [logged, setLogged] = React.useState(false)
   React.useEffect(() => {
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, user => { 
       if (user) setLogged(true)
       else setLogged(false)
     }) 
@@ -36,25 +32,26 @@ function Layout({ children }) {
   const [items] = useCollectionData(query(collection(db, logist ? ' ' : user ? 'items' : ' ' ))) 
   const [tracks] = useCollectionData(query(collection(db, (logist || manager || admin) ? user ? 'track' : ' ' : ' '))) 
   const [consults] = useCollectionData(query(collection(db, logist ? ' ' : user ? 'consults' : ' '))) 
-
+  
   const [tarif] = useDocumentData(doc(db, 'tarif', 'tarif')) 
+  const [userData] = useDocumentData(doc(db, 'users', user?.email ?? ' ')) 
 
   const [opened, setOpened] = React.useState(false)
 
   return (
-    <PermissionContext.Provider value={{ service, purchase, logist, transac, manager, admin, tarif }}>
+    <PermissionContext.Provider value={{ service, purchase, logist, transac, manager, admin, tarif, userData}}>
       <DataContext.Provider value={{items, consults, tracks}}>
-        <div className={styles.wrapper}>
+        <div className='grid grid-rows-[auto_1fr] min-h-screen  dark:bg-[#1A1B1E] dark:text-white'>
           <Header 
             opened={opened}
             setOpened={setOpened}
           />
-          <div className='flex gap-x-4'>
+          <div className='grid grid-cols-[110px_auto]'>
             <Sidebar 
               opened={opened}
               setOpened={setOpened}
             /> 
-            <div className='mt-4 w-full p-4'>
+            <div className='w-full px-4'>
               {children}
             </div>
             {!logged && (

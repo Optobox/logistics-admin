@@ -22,7 +22,7 @@ function Managers({users}) {
     if (role.includes('manager')) return 'Главный менеджер'
   }
 
-  if (!admin || !manager) return <></>
+  if (!admin && !manager) return <></>
 
   return (
     <div className='w-full pb-24'>

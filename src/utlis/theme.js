@@ -1,6 +1,5 @@
 const theme = {
-  defaultRadius: 'md',
-  fontFamily: 'Inter, sans-serif',
+  defaultRadius: 0
 }
 
-export default theme
+export {theme}

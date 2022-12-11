@@ -35,7 +35,7 @@ function Orders() {
   if (transac || logist) return <></>
 
   return (
-    <div className='w-full pb-24'>
+    <div className='w-full pb-24 dark:bg-slate-800 p-4'>
       <Tabs
         defaultValue='Принятые'
         variant='pills'

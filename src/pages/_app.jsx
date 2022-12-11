@@ -1,12 +1,9 @@
 import '../styles/globals.css'
 import { withLayout } from '../layout/Layout'
-import { createEmotionCache, MantineProvider } from '@mantine/core'
-import theme from '../utlis/theme'
+import { MantineProvider } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
 import { NotificationsProvider } from '@mantine/notifications'
-import { useCollectionData } from 'react-firebase-hooks/firestore'
-import { collection, query } from 'firebase/firestore'
-import { db } from '../utlis/firebase'
+import { theme } from '../utlis/theme'
 
 
 function MyApp({ Component, pageProps }) {

@@ -16,8 +16,21 @@ a {
 }
 
 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.mantine-b146xb tbody tr td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #3f3f3f;
+  font-size: 14px;
+}
+
+.mantine-b146xb thead tr th {
+  border-bottom: 1px solid #8b8b8b;
+}
+
+
 
 @import './preflight.css';

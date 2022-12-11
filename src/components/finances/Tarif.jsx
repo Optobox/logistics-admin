@@ -66,6 +66,18 @@ function Tarif() {
           label='Сервис менеджер'
         />
         <TextInput
+          name='our_kg'
+          value={tax.our_kg ?? ''}
+          onChange={handleInput}
+          label='Наша доля кг'
+        />
+        <TextInput
+          name='our_cube'
+          value={tax.our_cube ?? ''}
+          onChange={handleInput}
+          label='Наша доля куб'
+        />
+        <TextInput
           name='logist_manager'
           value={tax.logist_manager ?? ''}
           onChange={handleInput}

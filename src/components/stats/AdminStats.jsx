@@ -1,6 +1,8 @@
 import React from 'react'
 import { DataContext } from '../../layout/Layout'
 import Cell from '../Cell'
+import ItemView from '../../components/item/ItemView'
+import { DeliveryNotes, Notes } from '../finances'
 
 function AdminStats() {
 
@@ -105,85 +107,108 @@ function AdminStats() {
   const ATPrib = (allPrib * 25) / 100
   const AAPrib = (allPrib * 10) / 100 
 
+  const same = items?.filter(e => {
+    return e.same
+  })
+
   return (
-    <div className='grid grid-cols-3 gap-'>
-      <Cell
-        caption='Консультации'
-        values={[
-          {label: 'Количество:', value: consults},
-          {label: 'Проведено:', value: filterBids(consults, 'status', 'done')},
-        ]}
-      />
-      <Cell
-        caption='Заявки'
-        values={[
-          {label: 'В очереди:', value: filterBids(items, 'status', 'raw')},
-          {label: 'В работе:', value: filterBids(items, 'status', 'adopted', 'waiting', 'suggested')},
-          {label: 'Отклонено:', value: rejectedWhiteRaw},
-          {label: 'Подано:', value: items}
-        ]}
-      />
-      <Cell
-        caption='Доставки'
-        values={[
-          {label: 'В пути:', value: filterBids(tracks, 'isTracking', true)},
-          {label: 'Ожидаемый доход:', value: trackPrib},
-          {label: 'Доставлено:', value: filterBids(tracks, 'ended', true)},
-        ]}
-      />
-      <Cell
-        caption='Доставки - Доход'
-        values={[
-          {label: 'Прибыль:', value: pureTracksPrib},
-          {label: 'Выплата:', value: logistPrib},
-          {label: 'Оборот:', value: tracksRev},
-        ]}
-      />
-      <Cell
-        caption='Заказы - Доход'
-        values={[
-          {label: 'Прибыль:', value: pureItemsPrib},
-          {label: 'Выплата (сервис):', value: servicePrib},
-          {label: 'Выплата (закуп):', value: purchasePrib},
-          {label: 'Оборот:', value: itemsRev},
-        ]}
-      />
-      <Cell
-        caption='Общее '
-        values={[
-          {label: 'Прибыль:', value: allPrib},
-          {label: 'Выплата:', value: SLPmanagersPrib},
-          {label: 'Оборот:', value: allRev},
-        ]}
-      />
-      <Cell
-        caption='Прибыль'
-        values={[
-          {label: 'A.K.:', value: AKPrib},
-          {label: 'A.T.:', value: ATPrib},
-          {label: 'A.A.:', value: AAPrib},
-        ]}
-      />
-      <Cell
-        caption='Посылки'
-        values={[
-          {label: 'В очереди:', value: activeDeliveries},
-          {label: 'В работе:', value: filterBids(workingDeliveries, 'status', 'waiting', 'pending', 'failed') },
-          {label: 'На складе:', value: filterBids(workingDeliveries, 'status', 'confirmed') },
-          {label: 'Отменено:', value: filterBids(workingDeliveries, 'status', 'canceled')},
-          {label: 'Доставлено:', value: deliveredTracks},
-        ]}
-      />
-      <Cell
-        caption='Заказы товаров'
-        values={[
-          {label: 'Заключено:', value: filterBids(items, 'status', 'done')},
-          {label: 'Предложенные:', value: filterBids(items, 'status', 'suggested') },
-          {label: 'Отклоненные:', value: rejectedWhileSuggestedOrWaiting},
-          {label: 'Выполнено:', value: filterBids(items, 'status', 'ended') },
-        ]}
-      />
-    </div>
+    <>
+      <div className='grid grid-cols-4 gap-4 mb-8'>
+        <Cell
+          caption='Консультации'
+          values={[
+            {label: 'Количество:', value: consults},
+            {label: 'Проведено:', value: filterBids(consults, 'status', 'done')},
+          ]}
+        />
+        <Cell
+          caption='Заявки'
+          values={[
+            {label: 'В очереди:', value: filterBids(items, 'status', 'raw')},
+            {label: 'В работе:', value: filterBids(items, 'status', 'adopted', 'waiting', 'suggested')},
+            {label: 'Отклонено:', value: rejectedWhiteRaw},
+            {label: 'Подано:', value: items}
+          ]}
+        />
+        <Cell
+          caption='Доставки'
+          values={[
+            {label: 'В пути:', value: filterBids(tracks, 'isTracking', true)},
+            {label: 'Ожидаемый доход:', value: trackPrib},
+            {label: 'Доставлено:', value: filterBids(tracks, 'ended', true)},
+          ]}
+        />
+        <Cell
+          caption='Доставки - Доход'
+          values={[
+            {label: 'Прибыль:', value: pureTracksPrib},
+            {label: 'Выплата:', value: logistPrib},
+            {label: 'Оборот:', value: tracksRev},
+          ]}
+        />
+        <Cell
+          caption='Заказы - Доход'
+          values={[
+            {label: 'Прибыль:', value: pureItemsPrib},
+            {label: 'Выплата (сервис):', value: servicePrib},
+            {label: 'Выплата (закуп):', value: purchasePrib},
+            {label: 'Оборот:', value: itemsRev},
+          ]}
+        />
+        <Cell
+          caption='Общее '
+          values={[
+            {label: 'Прибыль:', value: allPrib},
+            {label: 'Выплата:', value: SLPmanagersPrib},
+            {label: 'Оборот:', value: allRev},
+          ]}
+        />
+        <Cell
+          caption='Прибыль'
+          values={[
+            {label: 'A.K.:', value: AKPrib},
+            {label: 'A.T.:', value: ATPrib},
+            {label: 'A.A.:', value: AAPrib},
+          ]}
+        />
+        <Cell
+          caption='Посылки'
+          values={[
+            {label: 'В очереди:', value: activeDeliveries},
+            {label: 'В работе:', value: filterBids(workingDeliveries, 'status', 'waiting', 'pending', 'failed') },
+            {label: 'На складе:', value: filterBids(workingDeliveries, 'status', 'confirmed') },
+            {label: 'Отменено:', value: filterBids(workingDeliveries, 'status', 'canceled')},
+            {label: 'Доставлено:', value: deliveredTracks},
+          ]}
+        />
+        <Cell
+          caption='Заказы товаров'
+          values={[
+            {label: 'Заключено:', value: filterBids(items, 'status', 'done')},
+            {label: 'Предложенные:', value: filterBids(items, 'status', 'suggested') },
+            {label: 'Отклоненные:', value: rejectedWhileSuggestedOrWaiting},
+            {label: 'Выполнено:', value: filterBids(items, 'status', 'ended') },
+          ]}
+        />
+      </div>
+      <div className='mb-8'>
+        <ItemView
+          values={same}
+        />
+      </div>
+      <div className='flex gap-4'>
+        <Notes
+          lastElements={-5}
+          className='2xl:flex'
+          disabled
+        />
+        <DeliveryNotes
+          lastElements={-5}
+          className='2xl:flex'
+          disabled
+        />
+      </div>
+    </>
   )
 }
 

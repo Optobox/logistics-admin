@@ -13,20 +13,22 @@ function ItemBody({values = [], handleSelected, selected}) {
   const matches = useMediaQuery('(min-width: 1024px)');
 
   return (
-    <Table className='h-min'>
+    <Table 
+      className='h-min dark:text-gray-200 bg-neutral-50 dark:bg-[#101113]'
+    >
       <thead>
-        <tr>
-          <th>№</th>
-          <th>Дата</th>
-          {matches && <th>Cвязь</th>}
-          {matches && <th>Вид</th>}
-          {matches && <th>Название</th>}
-          {matches && <th>Категория</th>}
-          {matches && <th>Тип</th>}
-          {matches && <th>Приоритет</th>}
-          <th>Бюджет</th>
-          {matches && <th>Статус</th>}
-          {matches && <th>Менеджер</th>}
+        <tr >
+          <th className='dark:text-gray-100'>№</th>
+          <th className='dark:text-gray-100'>Дата</th>
+          {matches && <th className='dark:text-gray-100'>Cвязь</th>}
+          {matches && <th className='dark:text-gray-100'>Вид</th>}
+          {matches && <th className='dark:text-gray-100'>Название</th>}
+          {matches && <th className='dark:text-gray-100'>Категория</th>}
+          {matches && <th className='dark:text-gray-100'>Тип</th>}
+          {matches && <th className='dark:text-gray-100'>Приоритет</th>}
+          <th className='dark:text-gray-100'>Бюджет</th>
+          {matches && <th className='dark:text-gray-100'>Статус</th>}
+          {matches && <th className='dark:text-gray-100'>Менеджер</th>}
         </tr>
       </thead>
       <tbody>
@@ -39,10 +41,10 @@ function ItemBody({values = [], handleSelected, selected}) {
               key={i}
               onClick={() => handleSelected(item?.id, item)}
               className={cn('transition-all duration-200', {
-                'bg-slate-100': selected == item?.id,
+                'dark:bg-slate-500 bg-slate-200': selected == item?.id,
               })}
             >
-              <td>
+              <td className=''>
                 {item?.number}
               </td>
               <td className='whitespace-nowrap'>

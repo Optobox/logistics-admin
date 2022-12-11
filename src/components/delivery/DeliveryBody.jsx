@@ -6,7 +6,7 @@ import cn from 'classnames'
 
 function DeliveryBody({values, handleSelected, selected}) {
   return (
-    <Table className='h-min'>
+    <Table className='h-min dark:text-slate-200 bg-gray-50'>
       <thead>
         <tr>
           <th>Имя</th>
@@ -31,7 +31,7 @@ function DeliveryBody({values, handleSelected, selected}) {
               key={i} 
               onClick={() => handleSelected(item?.id, item, i)}
               className={cn('transition-all duration-200', {
-                'bg-slate-200': selected == item?.id
+                'dark:bg-slate-500 bg-slate-200': selected == item?.id
               })}
             >
               <td>

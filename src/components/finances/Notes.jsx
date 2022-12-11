@@ -6,7 +6,7 @@ import cn from 'classnames'
 
 import {styles} from '../item/ItemView'
 
-function Notes() {
+function Notes({lastElements, className, disabled}) {
 
   const {items, tracks} = React.useContext(DataContext)
 
@@ -27,14 +27,14 @@ function Notes() {
   })?.[0]?.link
 
   return (
-    <div className='grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full'>
+    <div className={cn('grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full', className)}>
       <Table className='h-min'>
         <thead>
           <tr>
             <th>ID заказа</th>
             <th>Доход</th>
             <th>Стоимость</th>
-            <th>Вас прибыль </th>
+            <th>Вал прибыль </th>
             <th>Сервис.</th>
             <th>Закупщик.</th>
             <th>Прибыль.</th>
@@ -48,7 +48,7 @@ function Notes() {
               return e?.selected
             })?.[0]?.cost
 
-            const prib = item?.our_cost - cost
+            const prib = item?.received_sum - cost
             const servicePrib = (prib * item?.service_tarif) / 100 
             const purchasePrib = (prib * item?.purchase_tarif) / 100
             const ourPrib = prib - (servicePrib + purchasePrib)
@@ -63,19 +63,19 @@ function Notes() {
                 })}
               >
                 <td>{item?.id}</td>
-                <td>{item?.our_cost}</td>
+                <td>{item?.received_sum}</td>
                 <td>{cost}</td>
                 <td>{prib}</td>
                 <td>{servicePrib}</td>
                 <td>{purchasePrib}</td>
                 <td>{ourPrib}</td>
-                <td>{endedAt}</td>
+                {/* <td>{endedAt}</td> */}
               </tr>
             )
-          })}
+          })?.slice(lastElements ? lastElements : 0)}
         </tbody>
       </Table>
-      {selected && (
+      {(selected && !disabled) && (
         <div className='p-4 border space-y-4'>
           <div className={styles.block}>
             <p className={styles.label}>Дата создания:</p>

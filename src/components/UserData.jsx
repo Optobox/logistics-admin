@@ -13,7 +13,7 @@ function UserData() {
 
   const {service, manager, logist, transac, purchase, admin} = React.useContext(PermissionContext)
 
-  const activity = new Date((new Date().getTime() - new Date(user?.metadata?.creationTime)) * 1000)  
+  const activity = ((new Date().getTime() - new Date(user?.metadata?.creationTime).getTime()) / (1000 * 3600 * 24))
 
   const [value] = useDocumentData(doc(db, 'users', String(user?.email)))
 
@@ -56,7 +56,7 @@ function UserData() {
         </li>
         <li>
           <span>Активность: </span>
-          <span>{dayjs(activity).format('DD')} дней</span>
+          <span>{Math.round(activity)} дней</span>
         </li>
       </ul>
     </div>

@@ -69,7 +69,7 @@ function DeliveryDetails({item, setItem}) {
   
   return (
     <div className='space-y-4'>
-      <Table className='border'>
+      <Table className=''>
         <thead>
           <tr>
             <th>ID</th>

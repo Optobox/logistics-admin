@@ -1,9 +1,8 @@
 import React from 'react'
-import { TextInput, Select, PasswordInput, Button } from '@mantine/core'
+import { TextInput, PasswordInput, Button } from '@mantine/core'
 import axios from 'axios'
-import { addDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
-import { db } from '../../utlis/firebase'
-import { randomId } from '@mantine/hooks'
+import { merged } from '../../utlis/validation'
+import { showNotification } from '@mantine/notifications'
 
 
 function CreateManager() {
@@ -13,45 +12,77 @@ function CreateManager() {
     phoneNumber: '',
     password: '',
     password_confirmation: '',
-    displayName: '',
+    name: '',
   })
 
-  const createUser = async (e) => {
-    e.preventDefault()
-    await axios.post('/api/users', {
-      email: visor.email,
-      password: visor.password, 
-      displayName: visor.displayName
-    })
-    .then(e => {
-      console.log(e);
-    })
-    .catch(err => {
+  const [errors, setErrors] = React.useState({
+    email: [],
+    phoneNumber: [],
+    password: [],
+    password_confirmation: [],
+    name: [],
+    other: []
+  })
 
+  const yupErrorToErrorObject = (err) => {
+    const object = {};
+    err.inner.forEach((x) => {
+      if (x.path !== undefined) {
+        object[x.path] = x.errors;
+      }
+    });
+    return setErrors(object);
+  }
+
+  const validate = async (e) => {
+    e.preventDefault()
+    await merged.validate({
+      name: visor.name,
+      email: visor.email, 
+      password: visor.password,
+      password_confirmation: visor.password_confirmation,
+    }, {abortEarly: false})
+    .then(e => {
+      createUser()
+    })
+    .catch(e => {
+      yupErrorToErrorObject(e)
     })
   }
 
-  const createUserStore = async () => {
-    await addDoc(doc(db, 'users'), {
-      
+  const createUser = async e => {
+    await axios.post('/api/users', {
+      email: visor.email,
+      password: visor.password, 
+      displayName: visor.name,
+      phoneNumber: visor.phoneNumber
+    })
+    .then(e => {
+      showNotification({title: 'Менеджер', message: 'Менеджер успешно создан', color: 'green'})
+      setVisor({})
+      setErrors({})
+    })
+    .catch(err => {
+      setErrors({...errors, other: [err.response?.data?.message] });
     })
   }
 
   const handleInput = e => {
     const {name, value} = e.target
     setVisor({...visor, [name]: value})
+    setErrors({...errors, [name]: []})
   }
-
 
   return (
     <div>
       <h2 className='mb-4 text-xl'>Создание менеджера</h2>
-      <form className='max-w-xs space-y-4' onSubmit={createUser}>
+      <form className='max-w-xs space-y-4' onSubmit={validate}>
         <TextInput
           label='Имя Фамилия'
-          name='displayName'
-          value={visor.displayName ?? ''}
+          name='name'
+          value={visor.name ?? ''}
           onChange={handleInput}
+          error={errors?.name?.[0]}
         />
         <TextInput
           label='Телефон'
@@ -64,12 +95,14 @@ function CreateManager() {
           name='email'
           value={visor.email ?? ''}
           onChange={handleInput}
+          error={errors?.email?.[0]}
         />
         <PasswordInput
           label='Пароль'
           name='password'
           value={visor.password ?? ''}
           onChange={handleInput}
+          error={errors?.password?.[0]}
           visible
         />
         <PasswordInput
@@ -77,9 +110,16 @@ function CreateManager() {
           name='password_confirmation'
           value={visor.password_confirmation ?? ''}
           onChange={handleInput}
+          error={errors?.password_confirmation?.[0]}
           visible
         />
-        <Button type='submit'>
+
+        {errors.other?.[0] && (
+          <p className='text-pink-500 text-sm'>{errors.other?.[0]}</p>
+        )}
+        <Button 
+          type='submit'
+        >
           Создать
         </Button>
       </form>

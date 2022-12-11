@@ -92,14 +92,14 @@ function ConsultView({values = []}) {
 
   return (
     <div className='grid grid-cols-[60%_auto]'>
-      <Table className='h-min'>
+      <Table className='h-min dark:text-slate-200 bg-gray-50'>
         <thead>
           <tr>
-            <th>№</th>
-            <th>Дата создания</th>
-            <th>Время связи</th>
-            <th>Имя</th>
-            <th>Вопрос</th>
+            <th><span className='dark:text-slate-200'>№</span></th>
+            <th><span className='dark:text-slate-200'>Дата создания</span></th>
+            <th><span className='dark:text-slate-200'>Время связи</span></th>
+            <th><span className='dark:text-slate-200'>Имя</span></th>
+            <th><span className='dark:text-slate-200'>Вопрос</span></th>
           </tr>
         </thead>
         <tbody>
@@ -110,7 +110,7 @@ function ConsultView({values = []}) {
                 key={i}
                 onClick={() => handleSelected(item?.id, item)}
                 className={cn('transition-all duration-200', {
-                  'bg-slate-100': selected == item?.id
+                  'dark:bg-slate-500 bg-gray-200 ': selected == item?.id
                 })}
               >
                 <td>{item?.number}</td>
@@ -124,7 +124,7 @@ function ConsultView({values = []}) {
         </tbody>
       </Table>
       {selected && (
-        <form className='border p-4 space-y-4'>
+        <form className='p-4 space-y-4'>
           <div className='space-y-2'>
             <div className={styles.block}>
               <p className={styles.label}>Дата создания</p>
