@@ -11,8 +11,8 @@ import useAuth from '../hooks/useAuth'
 
 const styles = {
   block: 'grid grid-cols-[30%_auto]',
-  label: 'font-semibold',
-  value: 'font-semibold'
+  label: '',
+  value: ''
 }
 
 function ConsultView({values = []}) {

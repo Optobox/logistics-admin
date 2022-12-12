@@ -46,12 +46,12 @@ function Layout({ children }) {
             opened={opened}
             setOpened={setOpened}
           />
-          <div className='grid grid-cols-[110px_auto]'>
+          <div className='grid grid-cols-[90px_auto]'>
             <Sidebar 
               opened={opened}
               setOpened={setOpened}
             /> 
-            <div className='w-full px-4'>
+            <div className='w-full'>
               {children}
             </div>
             {!logged && (

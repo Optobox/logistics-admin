@@ -1,5 +1,5 @@
 const theme = {
-  defaultRadius: 0
+  defaultRadius: 0,
 }
 
 export {theme}

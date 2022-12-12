@@ -27,8 +27,6 @@ function ItemBody({values = [], handleSelected, selected}) {
           {matches && <th className='dark:text-gray-100'>Тип</th>}
           {matches && <th className='dark:text-gray-100'>Приоритет</th>}
           <th className='dark:text-gray-100'>Бюджет</th>
-          {matches && <th className='dark:text-gray-100'>Статус</th>}
-          {matches && <th className='dark:text-gray-100'>Менеджер</th>}
         </tr>
       </thead>
       <tbody>
@@ -80,16 +78,6 @@ function ItemBody({values = [], handleSelected, selected}) {
               <td>
                 {item.cost}
               </td>
-              {matches && (
-                <td>
-                  {item.status}
-                </td>
-              )}
-              {matches && (
-                <td>
-                  {item.service_manager?.email}
-                </td>
-              )}
             </tr>
           )
         })}

@@ -15,10 +15,10 @@ import useAuth from '../../hooks/useAuth'
 import ItemImages from './ItemImages'
 
 export const styles = {
-  block: 'grid grid-cols-[30%_auto]',
-  label: 'font-semibold',
-  value: 'font-semibold'
-}
+  block: "grid grid-cols-[30%_auto]",
+  label: "text-sm",
+  value: "text-sm",
+};
 
 export const ItemContext = React.createContext(null)
 
@@ -314,7 +314,7 @@ function ItemView({ values = [] }) {
   return (
     <>
       <ItemContext.Provider value={{suggested, adopted, raw, waiting, ended, done, rejected, same}}>
-        <div className='grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full'>
+        <div className='grid grid-cols-1 xl:grid-cols-[65%_35%] w-full'>
           <ItemBody 
             values={values} 
             handleSelected={handleSelected} 
@@ -336,7 +336,7 @@ function ItemView({ values = [] }) {
                 confirmModal={confirmModal}
               />
               {isOrder ? 
-                <form className='border p-4 space-y-4'>
+                <form className='px-4 space-y-4'>
                   <div className='space-y-2'>
                     {((!service || manager) && (service || !manager)) && (
                       <>
@@ -365,7 +365,7 @@ function ItemView({ values = [] }) {
                   </div>
                 </form>
               :
-                <form className='border p-4 space-y-4'>
+                <form className='p-4 space-y-4'>
                   <div className='space-y-2'>
                     {suggested && (
                       <div className={styles.block}>
@@ -379,7 +379,6 @@ function ItemView({ values = [] }) {
                     {done && (
                       <Button
                         color={'green'}
-                        px={30}
                         onClick={() => confirmModal('Вы действительно хотите завершить заявку?', 'ended', 'Подтвердить', endItem)}
                       >
                         Завершить
@@ -389,7 +388,6 @@ function ItemView({ values = [] }) {
                       {waiting && (
                         <Button
                           color={'green'}
-                          px={30}
                           onClick={() => confirmModal('Вы действительно хотите принять заявку?', 'adopted', 'Подтвердить', adoptItem)}
                         >
                           Принять
@@ -398,7 +396,6 @@ function ItemView({ values = [] }) {
                       {suggested && (
                         <Button
                           color={'green'}
-                          px={30}
                           onClick={() => confirmModal('Вы действительно хотите заключить заявку?', 'done', 'Подтвердить', concludeItem)}
                           disabled={again || !item?.recieved_sum}
                         >
@@ -409,7 +406,6 @@ function ItemView({ values = [] }) {
                         <>
                           <Button
                             color={'green'}
-                            px={30}
                             disabled={!item?.duration}
                             onClick={() => confirmModal('Вы действительно хотите принять заявку?', 'adopted', 'Подтвердить', adoptItem)}
                           >
@@ -418,7 +414,6 @@ function ItemView({ values = [] }) {
                         {!same && (
                           <Button
                             color={'green'}
-                            px={30}
                             onClick={() => confirmModal('Вы действительно хотите принять заявку?', 'suggested', 'Подтвердить', sameItem)}
                           >
                             Похожий заказ
@@ -429,8 +424,8 @@ function ItemView({ values = [] }) {
                       {(admin && rejected) && (
                         <Button 
                           color={'green'} 
-                          variant={'outline'} 
-                          px={30} onClick={() => confirmModal('Вы действительно хотите восстановить заявку?', 'raw', 'Восстановить', restoreItem)}
+                          variant={'outline'}
+                          onClick={() => confirmModal('Вы действительно хотите восстановить заявку?', 'raw', 'Восстановить', restoreItem)}
                         >
                           Восстановить
                         </Button>
@@ -438,8 +433,8 @@ function ItemView({ values = [] }) {
                       {(raw || adopted || suggested || waiting) && (
                         <Button 
                           color={'red'} 
-                          variant={'outline'} 
-                          px={30} onClick={() => rejectModal('Вы действительно хотите принять заявку?', 'rejected', 'Отклонить', rejectItem)}
+                          variant={'outline'}
+                          onClick={() => rejectModal('Вы действительно хотите принять заявку?', 'rejected', 'Отклонить', rejectItem)}
                         >
                           Отклонить
                         </Button>
@@ -448,7 +443,6 @@ function ItemView({ values = [] }) {
                       {suggested && (
                         <Button
                           color={'yellow'}
-                          px={30}
                           onClick={reAdopt}
                           variant='subtle'
                         >
@@ -501,14 +495,12 @@ function ItemView({ values = [] }) {
                         <div className='space-x-4'>
                           <Button
                             color={'yellow'}
-                            px={30}
                             onClick={() => confirmModal('Вы действительно хотите переподать заявку?', 'adopted', 'Переподать', reAdoptItem)}
                           >
                             Переподача
                           </Button>
                           <Button
                             color={'yellow'}
-                            px={30}
                             onClick={() => setAgain(false)}
                             variant='subtle'
                           >

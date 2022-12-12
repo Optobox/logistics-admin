@@ -43,11 +43,11 @@ function Deliveries() {
             <Tabs.Tab value='Активные'>Активные</Tabs.Tab>
             <Tabs.Tab value='В работе'>В работе</Tabs.Tab>
           </Tabs.List>
-          <Tabs.Panel value='Активные' pt='md'>
+          <Tabs.Panel value='Активные'>
             <DeliveryView values={deliveries} />    
           </Tabs.Panel>
 
-          <Tabs.Panel value='В работе' pt='md'>
+          <Tabs.Panel value='В работе'>
             <DeliveryView values={myDeliveries} />    
           </Tabs.Panel>
         </Tabs>

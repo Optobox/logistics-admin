@@ -124,7 +124,7 @@ function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmM
 
   return (
     <>
-      <div className='p-4'>
+      <div className='px-4'>
         {isOrder ? (
           (!service || manager) && (service || !manager)) && (
             <>
@@ -183,7 +183,7 @@ function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmM
                   {urls?.map((e, i) => {
                     return (
                       <React.Fragment key={i}>
-                        <div className='flex gap-4 items-center pr-6' key={i}>
+                        <div className='flex gap-4 items-center' key={i}>
                           <TextInput
                             className='w-full'
                             value={e.link ?? ''}

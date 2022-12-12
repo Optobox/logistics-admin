@@ -37,7 +37,7 @@ function Managers({users}) {
           <Tabs.Tab value='Управление'>Управление</Tabs.Tab>
           <Tabs.Tab value='Статистика' disabled={manager}>Статистика</Tabs.Tab>
         </Tabs.List>
-        <Tabs.Panel value='Управление' pt='md'>
+        <Tabs.Panel value='Управление'>
           <div className='space-y-4'>
             <div className='flex gap-16'>
               <CreateManager/>
@@ -74,7 +74,7 @@ function Managers({users}) {
             </Table>
           </div>
         </Tabs.Panel>
-        <Tabs.Panel value='Статистика' pt='md'>
+        <Tabs.Panel value='Статистика'>
           <AllManagerStats managers={managers} />
         </Tabs.Panel>
       </Tabs>

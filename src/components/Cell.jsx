@@ -4,9 +4,9 @@ import { Menu } from '@mantine/core'
 
 const styles = {
   cell: 'p-4 border flex gap-4 justify-between',
-  label: 'font-semibold text-xl',
-  value: 'font-semibold text-xl',
-  def: 'text-sm tracking-wider',
+  label: 'text-xl font-jost',
+  value: 'text-xl font-manrope',
+  def: 'text-sm tracking-wider font-manrope',
 }
 
 function Cell({caption, values, className}) {
@@ -64,7 +64,7 @@ function Cell({caption, values, className}) {
           )
         })}
       </div>
-      <div className='border p-2 h-min space-y-2 font-semibold text-lg px-4 cursor-pointer'>
+      <div className='border p-2 h-min space-y-2 font-manrope text-lg px-4 cursor-pointer'>
         <Menu>
           <Menu.Target>
             <p>

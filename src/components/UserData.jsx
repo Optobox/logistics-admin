@@ -22,7 +22,7 @@ function UserData() {
   if (!user) return <></>
 
   return (
-    <div className='flex items-center gap-x-20'>
+    <div className='font-manrope flex items-center gap-x-20'>
       <Avatar src={user.photoURL} />
       <ul>
         <li>

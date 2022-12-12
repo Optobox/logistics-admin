@@ -63,22 +63,22 @@ function Bids({}) {
           <Tabs.Tab value='Завершено'>Завершено</Tabs.Tab>
           <Tabs.Tab value='Отклоненные'>Отклоненнo</Tabs.Tab>
         </Tabs.List>
-        <Tabs.Panel value='Активные' pt='md'>
+        <Tabs.Panel value='Активные' >
           <ItemView values={raw} />
         </Tabs.Panel>
-        <Tabs.Panel value='Ожидающие' pt='md'>
+        <Tabs.Panel value='Ожидающие' >
           <ItemView values={waiting} />
         </Tabs.Panel>
-        <Tabs.Panel value='Отклоненные' pt='md'>
+        <Tabs.Panel value='Отклоненные' >
           <ItemView values={rejected} />
         </Tabs.Panel>
-        <Tabs.Panel value='Предложенные' pt='md'>
+        <Tabs.Panel value='Предложенные' >
           <ItemView values={admin ? concated : suggested} />
         </Tabs.Panel>
-        <Tabs.Panel value='Заключено' pt='md'>
+        <Tabs.Panel value='Заключено' >
           <ItemView values={done} />
         </Tabs.Panel>
-        <Tabs.Panel value='Завершено' pt='md'>
+        <Tabs.Panel value='Завершено' >
           <ItemView values={ended} />
         </Tabs.Panel>
       </Tabs>

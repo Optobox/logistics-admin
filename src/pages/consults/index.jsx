@@ -39,16 +39,16 @@ function Consults() {
             <Tabs.Tab value='Отклоненные'>Отклоненные</Tabs.Tab>
             <Tabs.Tab value='Завершенные'>Завершенные</Tabs.Tab>
           </Tabs.List>
-          <Tabs.Panel value='Активные' pt='md'>
+          <Tabs.Panel value='Активные'>
             <ConsultView values={active} />
           </Tabs.Panel>
 
-          <Tabs.Panel value='Отклоненные' pt='md'>
+          <Tabs.Panel value='Отклоненные'>
             <ConsultView values={rejected} />
 
           </Tabs.Panel>
 
-          <Tabs.Panel value='Завершенные' pt='md'>
+          <Tabs.Panel value='Завершенные'>
             <ConsultView values={done} />
           </Tabs.Panel>
         </Tabs>

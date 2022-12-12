@@ -14,6 +14,10 @@ module.exports = {
         center: true,
         padding: '1rem'
       }
+      , fontFamily: {
+        "manrope":["Manrope"],
+        "jost":["Jost"]
+      }
     },
   },
   plugins: [],

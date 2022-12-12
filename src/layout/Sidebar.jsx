@@ -21,10 +21,10 @@ function Sidebar({opened, setOpened}) {
 
   const router = useRouter()
   const styles = {
-    link: `px-2 py-5  cursor-pointer h-min flex flex-col items-center`,
+    link: `px-1 py-5  cursor-pointer h-min flex flex-col items-center`,
     activeLink: 'bg-blue-500 text-white',
-    label: 'text-xs ',
-    icon: 'text-2xl '
+    label: 'text-[10px] font-manrope',
+    icon: 'text-xl'
   }
 
   const {user, loading} = useAuth()
@@ -82,7 +82,7 @@ function Sidebar({opened, setOpened}) {
               >
                 <FiShoppingCart className={styles.icon}/>
                 <span className={styles.label}>
-                  Заказы товаров
+                  Закупки
                 </span>
               </div>
             </Link>

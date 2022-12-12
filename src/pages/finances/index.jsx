@@ -29,13 +29,13 @@ function Finances() {
         <Tabs.Panel value='Тарифы' pt='md'>
           <Tarif/>
         </Tabs.Panel>
-        <Tabs.Panel value='Записи заказов' pt='md'>
+        <Tabs.Panel value='Записи заказов'>
           <Notes/>
         </Tabs.Panel>
-        <Tabs.Panel value='Записи доставок' pt='md'>
+        <Tabs.Panel value='Записи доставок'>
           <DeliveryNotes/>
         </Tabs.Panel>
-        <Tabs.Panel value='Записи транзакций' pt='md'>
+        <Tabs.Panel value='Записи транзакций'>
           <TransactionNotes/>
         </Tabs.Panel>
         <Tabs.Panel value='Банкинг' pt='md'>

@@ -36,10 +36,10 @@ function Track() {
             <Tabs.Tab value='Активные'>Активные</Tabs.Tab>
             <Tabs.Tab value='Доставлено'>Доставлено</Tabs.Tab>
           </Tabs.List>
-          <Tabs.Panel value='Активные' pt={'xl'}>
+          <Tabs.Panel value='Активные'>
             <DeliveryView values={active}  />
           </Tabs.Panel>
-          <Tabs.Panel value='Доставлено' pt={'xl'}>
+          <Tabs.Panel value='Доставлено'>
             <DeliveryView values={ended}  />
           </Tabs.Panel>
         </Tabs>

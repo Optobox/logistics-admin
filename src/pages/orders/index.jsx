@@ -35,7 +35,6 @@ function Orders() {
   if (transac || logist) return <></>
 
   return (
-    <div className='w-full pb-24 dark:bg-slate-800 p-4'>
       <Tabs
         defaultValue='Принятые'
         variant='pills'
@@ -50,23 +49,22 @@ function Orders() {
           <Tabs.Tab value='Заключено' disabled={service || manager}>Заключено</Tabs.Tab>
           <Tabs.Tab value='Завершено' disabled={service || manager}>Завершено</Tabs.Tab>
         </Tabs.List>
-        <Tabs.Panel value='Принятые' pt='md'>
+        <Tabs.Panel value='Принятые'>
           <ItemView values={adopted} />
         </Tabs.Panel>
-        <Tabs.Panel value='Предложенные' pt='md'>
+        <Tabs.Panel value='Предложенные'>
           <ItemView values={suggested} />
         </Tabs.Panel>
-        <Tabs.Panel value='Ожидающие' pt='md'>
+        <Tabs.Panel value='Ожидающие'>
           <ItemView values={waiting} />
         </Tabs.Panel>
-        <Tabs.Panel value='Заключено' pt='md'>
+        <Tabs.Panel value='Заключено'>
           <ItemView values={done} />
         </Tabs.Panel>
-        <Tabs.Panel value='Завершено' pt='md'>
+        <Tabs.Panel value='Завершено'>
           <ItemView values={ended} />
         </Tabs.Panel>
       </Tabs>
-    </div>
   )
 }
 

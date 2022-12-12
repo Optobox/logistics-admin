@@ -18,13 +18,13 @@ function Header({}) {
 
   return (
     <div className='w-full py-2'>
-      <div className='flex justify-between items-center gap-4 px-6'>
+      <div className='flex justify-between items-center gap-4 px-4'>
         <Link href={'/'}>
           <div className='flex items-center gap-2 cursor-pointer'>
             <Image
               src={logo}
             />
-            <span className='text-xl font-semibold'> 
+            <span className='text-xl font-semibold font-jost'> 
               OptoBox CRM  
             </span>
           </div>

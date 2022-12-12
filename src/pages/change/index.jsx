@@ -22,15 +22,15 @@ function Change() {
           <Tabs.Tab value='Отклоненные'>Отклоненные</Tabs.Tab>
           <Tabs.Tab value='Завершенные'>Завершенные</Tabs.Tab>
         </Tabs.List>
-        <Tabs.Panel value='Активные' pt='md'>
+        <Tabs.Panel value='Активные'>
           {/* <Tablet array={active} /> */}
         </Tabs.Panel>
 
-        <Tabs.Panel value='Отклоненные' pt='md'>
+        <Tabs.Panel value='Отклоненные'>
           {/* <Tablet array={rejected} /> */}
         </Tabs.Panel>
 
-        <Tabs.Panel value='Завершенные' pt='md'>
+        <Tabs.Panel value='Завершенные'>
           {/* <Tablet array={archived} /> */}
         </Tabs.Panel>
       </Tabs>
