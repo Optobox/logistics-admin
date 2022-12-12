@@ -54,10 +54,8 @@ function DeliverySteps({item}) {
     }) 
   }
 
-
-
   return (
-    <div>
+    <div className='px-4'>
       <div className='flex gap-4 mt-6'>
         {steps.map((e) => {
           return (

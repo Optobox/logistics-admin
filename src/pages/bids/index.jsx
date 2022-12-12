@@ -4,6 +4,7 @@ import ItemView from '../../components/item/ItemView'
 
 import { DataContext, PermissionContext } from '../../layout/Layout'
 import useAuth from '../../hooks/useAuth'
+import Head from 'next/head'
 
 function Bids({}) {
 
@@ -42,7 +43,6 @@ function Bids({}) {
   const ended = items?.filter((item) => {
     return (item.status == 'ended') && ((item.service_manager?.uid == user?.uid || item.purchase_manager?.uid == user?.uid) || admin)
   })
-
 
   if (purchase || logist || transac) return <></>
 

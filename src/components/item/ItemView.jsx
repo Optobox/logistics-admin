@@ -314,14 +314,14 @@ function ItemView({ values = [] }) {
   return (
     <>
       <ItemContext.Provider value={{suggested, adopted, raw, waiting, ended, done, rejected, same}}>
-        <div className='grid grid-cols-1 xl:grid-cols-[65%_35%] w-full'>
+        <div className='grid grid-cols-1 xl:grid-cols-[65%_35%] w-full h-full'>
           <ItemBody 
             values={values} 
             handleSelected={handleSelected} 
             selected={selected} 
           />
           {selected && (
-            <div>
+            <div className='dark:bg-slate-800'>
               <ItemDetails  
                 item={item}
                 setItem={setItem}

@@ -16,7 +16,7 @@ function ItemDetails({ item, setItem }) {
   const readOnly = (suggested || done || rejected || ended) || isOrder
 
   return (
-    <div className='space-y-2 p-4  dark:text-gray-300'>            
+    <div className='space-y-2 p-4 dark:text-gray-300'>            
       <div className={styles.block}>
         <p className={styles.label}>Дата:</p>
         <p className={styles.value}>{dayjs(item?.createdAt?.seconds * 1000).format('DD-MM-YYYY, HH:mm')}</p>

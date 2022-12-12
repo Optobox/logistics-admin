@@ -24,7 +24,7 @@ function DeliveryNotes({lastElements, className, disabled}) {
 
   return (
     <div 
-      className={cn('grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full', className)}>
+      className={cn('grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full dark:bg-slate-800', className)}>
       <Table className='h-min'>
         <thead>
           <tr>
@@ -52,7 +52,7 @@ function DeliveryNotes({lastElements, className, disabled}) {
                 key={i}
                 onClick={() => handleSelected(e?.id, e)}
                 className={cn('transition-all duration-200', {
-                  'bg-slate-100': selected == e?.id,
+                  'bg-gray-600': selected == e?.id,
                 })}
               >
                 <td>{e?.id}</td>

@@ -52,7 +52,7 @@ function DeliveryView({values = []}) {
         selected={selected}
       />
       {selected && (
-        <div className='space-y-4'>
+        <div className='space-y-4 dark:bg-slate-800'>
           <DeliveryDetails
             item={item}            
             setItem={setItem}

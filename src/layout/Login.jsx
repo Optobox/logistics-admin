@@ -6,7 +6,6 @@ const styles = {
   inputError: 'mb-2'
 }
 
-
 function Login() {
 
   const { values, handleSubmit, errors, handleInputChange, loading } = useForm()
@@ -22,7 +21,7 @@ function Login() {
             autoComplete="email"
             required
             placeholder="Почта"
-            value={values.email}
+            value={values.email ?? ''}
             onChange={handleInputChange}
             error={errors.email?.[0]}
             classNames={{
@@ -38,7 +37,7 @@ function Login() {
             autoComplete="current-password"
             required
             placeholder="Пароль"
-            value={values.password}
+            value={values.password ?? ''}
             onChange={handleInputChange}
             error={errors.password?.[0]}
             classNames={{

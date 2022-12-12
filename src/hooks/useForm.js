@@ -1,8 +1,14 @@
 import React from 'react'
-import { auth, db } from "../utlis/firebase"
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, sendEmailVerification, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
-
+import { auth } from "../utlis/firebase"
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  updateProfile, 
+  sendEmailVerification, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  sendPasswordResetEmail } from 'firebase/auth'
 import { loginSchema, merged } from "../utlis/validation"
 import { showNotification } from '@mantine/notifications'
 import { useRouter } from 'next/router'
@@ -12,19 +18,13 @@ export default function useForm() {
   const router = useRouter()
 
   const [values, setValues] = React.useState({
-    name: '',
     email: '',
     password: '',
-    password_confirmation: '',
-    stay: false
   })
 
   const [errors, setErrors] = React.useState({
-    name: [],
     email: [],
     password: [],
-    password_confirmation: [],
-    other: []
   })
 
   const [loading, setLoading] = React.useState(false)
@@ -103,7 +103,6 @@ export default function useForm() {
               showNotification({ title: 'Авторизация', message: `Вы вошли как ${e.user.displayName}`, color: 'green' })
               Cookies.set('user', e.user.uid, { expires: 7 })
               setLoading(false)
-              router.push('/')
             })
             .catch(e => {
               switch (e.code) {

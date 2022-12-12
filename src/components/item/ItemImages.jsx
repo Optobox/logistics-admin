@@ -124,7 +124,7 @@ function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmM
 
   return (
     <>
-      <div className='px-4'>
+      <div className='px-4 pr-8'>
         {isOrder ? (
           (!service || manager) && (service || !manager)) && (
             <>
@@ -133,7 +133,7 @@ function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmM
                   {item?.urls?.map((e, i) => {
                     return (
                       <div key={i}>
-                        <p className='flex items-center gap-4'>
+                      <p className='flex items-center gap-4'>
                           <span className='font-semibold w-24'>Ссылка:</span>
                           {e.link}
                         </p>
@@ -215,7 +215,7 @@ function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmM
                                 <img 
                                   src={urls[i].specs} 
                                   alt="" 
-                                  className='w-24 h-24' 
+                                  className='w-16 h-16' 
                                   onClick={() => handleImageView(e.specs)} 
                                 />
                                 <Button 
@@ -242,7 +242,7 @@ function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmM
                                 <img 
                                   src={urls[i].good} 
                                   alt=""  
-                                  className='w-24 h-24' 
+                                  className='w-16 h-16' 
                                   onClick={() => handleImageView(e.good)}
                                 />
                                 <Button 
@@ -269,7 +269,7 @@ function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmM
                                 <img 
                                   src={urls[i].extra} 
                                   alt=""  
-                                  className='w-24 h-24' 
+                                  className='w-16 h-16' 
                                   onClick={() => handleImageView(e.extra)}
                                 />
                                 <Button 

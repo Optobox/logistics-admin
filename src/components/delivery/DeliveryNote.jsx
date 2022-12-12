@@ -191,8 +191,8 @@ function DeliveryNote({item, setItem}) {
         value={pack}
         readOnly={item?.isTracking}
       >
-        <Checkbox checked={pack?.includes('carton')} value='carton' label='Картон' />
-        <Checkbox checked={pack?.includes('bag')} value='bag' label='Мешок' />
+        <Checkbox checked={pack?.includes('carton')} value='carton' label='Картон' classNames={{label: 'dark:text-gray-100'}} />
+        <Checkbox checked={pack?.includes('bag')} value='bag' label='Мешок' classNames={{label: 'dark:text-gray-100'}} />
       </Checkbox.Group>
       <TextInput
         name='carcas'

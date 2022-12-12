@@ -5,6 +5,7 @@ import { DataContext } from '../../layout/Layout'
 import cn from 'classnames'
 
 import {styles} from '../item/ItemView'
+import quoteSeperateNumber from '../../utlis/quoteSeperator'
 
 function Notes({lastElements, className, disabled}) {
 
@@ -27,7 +28,7 @@ function Notes({lastElements, className, disabled}) {
   })?.[0]?.link
 
   return (
-    <div className={cn('grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full', className)}>
+    <div className={cn('grid grid-cols-1 2xl:grid-cols-[65%_35%] w-full dark:bg-slate-800', className)}>
       <Table className='h-min'>
         <thead>
           <tr>
@@ -59,16 +60,16 @@ function Notes({lastElements, className, disabled}) {
                 key={i}
                 onClick={() => handleSelected(item?.id, item)}
                 className={cn('transition-all duration-200', {
-                  'bg-slate-100': selected == item?.id,
+                  'dark:bg-gray-500': selected == item?.id,
                 })}
               >
                 <td>{item?.id}</td>
-                <td>{item?.received_sum}</td>
-                <td>{cost}</td>
-                <td>{prib}</td>
-                <td>{servicePrib}</td>
-                <td>{purchasePrib}</td>
-                <td>{ourPrib}</td>
+                <td>{quoteSeperateNumber(Number(item?.received_sum))}</td>
+                <td>{quoteSeperateNumber(Number(cost))}</td>
+                <td>{quoteSeperateNumber(Number(prib))}</td>
+                <td>{quoteSeperateNumber(Number(servicePrib))}</td>
+                <td>{quoteSeperateNumber(Number(purchasePrib))}</td>
+                <td>{quoteSeperateNumber(Number(ourPrib))}</td>
                 {/* <td>{endedAt}</td> */}
               </tr>
             )
@@ -121,7 +122,7 @@ function Notes({lastElements, className, disabled}) {
           </div>
           <div className={styles.block}>
             <p className={styles.label}>Бюджет</p>
-            <p className={styles.value}>{item?.cost} тг</p>
+            <p className={styles.value}>{quoteSeperateNumber(Number(item?.cost))} тг</p>
           </div>
 
           <div className={styles.block}>

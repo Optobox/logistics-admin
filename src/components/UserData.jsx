@@ -11,7 +11,7 @@ function UserData() {
 
   const {user, loading} = useAuth()
 
-  const {service, manager, logist, transac, purchase, admin} = React.useContext(PermissionContext)
+  const {service, manager, logist, transac, purchase, admin, userData} = React.useContext(PermissionContext)
 
   const activity = ((new Date().getTime() - new Date(user?.metadata?.creationTime).getTime()) / (1000 * 3600 * 24))
 
@@ -22,14 +22,14 @@ function UserData() {
   if (!user) return <></>
 
   return (
-    <div className='font-manrope flex items-center gap-x-20'>
+    <div className='font-manrope flex flex-col max-w-md'>
       <Avatar src={user.photoURL} />
-      <ul>
-        <li>
+      <ul className='space-y-4 grid grid-cols-3'>
+        <li className='flex flex-col'>
           <span>Имя: </span>
           <span>{user?.displayName}</span>
         </li>
-        <li>
+        <li className='flex flex-col'>
           <span>Роль: </span>
           <span>
             {service && 'Сервис менеджер'}
@@ -40,21 +40,15 @@ function UserData() {
             {admin && 'Админ'}
           </span>
         </li>
-        <li>
+        <li className='flex flex-col'>
           <span>Тел: </span>
-          <span>{value?.phoneNumber}</span>
+          <span>{userData?.phoneNumber}</span>
         </li>
-      </ul>
-      <ul>
-        <li>
+        <li className='flex flex-col'>
           <span>Почта: </span>
           <span>{user?.email}</span>
         </li>
-        <li>
-          <span>UID: </span>
-          <span>{user?.uid}</span>
-        </li>
-        <li>
+        <li className='flex flex-col'>
           <span>Активность: </span>
           <span>{Math.round(activity)} дней</span>
         </li>

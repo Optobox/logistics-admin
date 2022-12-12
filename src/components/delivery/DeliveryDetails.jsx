@@ -123,6 +123,9 @@ function DeliveryDetails({item, setItem}) {
                     value={e?.weight ?? ''} 
                     name='weight'
                     className='w-[75px]' 
+                    classNames={{
+                      rightSection: 'text-black'
+                    }}
                     rightSection={'кг'}
                     onChange={(val) => handleWeightChange(val, i)}
                   />

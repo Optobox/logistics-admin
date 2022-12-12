@@ -6,7 +6,7 @@ import cn from 'classnames'
 
 function DeliveryBody({values, handleSelected, selected}) {
   return (
-    <Table className='h-min dark:text-slate-200 bg-gray-50'>
+    <Table className='h-min dark:text-gray-100 dark:bg-slate-800 bg-gray-50'>
       <thead>
         <tr>
           <th>Имя</th>

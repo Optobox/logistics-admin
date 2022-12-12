@@ -8,12 +8,7 @@ import cn from 'classnames'
 import dayjs from 'dayjs'
 import { doc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import useAuth from '../hooks/useAuth'
-
-const styles = {
-  block: 'grid grid-cols-[30%_auto]',
-  label: '',
-  value: ''
-}
+import { styles } from '../components/item/ItemView'
 
 function ConsultView({values = []}) {
 
@@ -89,10 +84,9 @@ function ConsultView({values = []}) {
       })
   }
 
-
   return (
-    <div className='grid grid-cols-[60%_auto]'>
-      <Table className='h-min dark:text-slate-200 bg-gray-50'>
+    <div className='grid grid-cols-[60%_auto] dark:bg-gray-800'>
+      <Table className='h-min '>
         <thead>
           <tr>
             <th><span className='dark:text-slate-200'>№</span></th>
@@ -110,7 +104,7 @@ function ConsultView({values = []}) {
                 key={i}
                 onClick={() => handleSelected(item?.id, item)}
                 className={cn('transition-all duration-200', {
-                  'dark:bg-slate-500 bg-gray-200 ': selected == item?.id
+                  'dark:bg-slate-600 bg-gray-200': selected == item?.id
                 })}
               >
                 <td>{item?.number}</td>

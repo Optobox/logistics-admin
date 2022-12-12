@@ -41,7 +41,7 @@ function Layout({ children }) {
   return (
     <PermissionContext.Provider value={{ service, purchase, logist, transac, manager, admin, tarif, userData}}>
       <DataContext.Provider value={{items, consults, tracks}}>
-        <div className='grid grid-rows-[auto_1fr] min-h-screen  dark:bg-[#1A1B1E] dark:text-white'>
+        <div className='grid grid-rows-[auto_1fr] min-h-screen  dark:bg-gray-900 dark:text-white'>
           <Header 
             opened={opened}
             setOpened={setOpened}

@@ -3,10 +3,10 @@ import cn from 'classnames'
 import { Menu } from '@mantine/core'
 
 const styles = {
-  cell: 'p-4 border flex gap-4 justify-between',
-  label: 'text-xl font-jost',
-  value: 'text-xl font-manrope',
-  def: 'text-sm tracking-wider font-manrope',
+  cell: 'p-4 border border-gray-400 flex gap-4 justify-between',
+  label: 'text-lg font-jost',
+  value: 'text-sm font-manrope',
+  def: 'text-xs tracking-wider font-manrope',
 }
 
 function Cell({caption, values, className}) {
@@ -64,7 +64,7 @@ function Cell({caption, values, className}) {
           )
         })}
       </div>
-      <div className='border p-2 h-min space-y-2 font-manrope text-lg px-4 cursor-pointer'>
+      <div className='border p-2 h-min space-y-2 font-manrope text-sm px-4 cursor-pointer'>
         <Menu>
           <Menu.Target>
             <p>
