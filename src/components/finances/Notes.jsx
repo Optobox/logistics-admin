@@ -1,7 +1,6 @@
 import { Table } from '@mantine/core'
 import dayjs from 'dayjs'
 import React from 'react'
-import { DataContext } from '../../layout/Layout'
 import cn from 'classnames'
 
 import {styles} from '../item/ItemView'
@@ -9,7 +8,7 @@ import quoteSeperateNumber from '../../utlis/quoteSeperator'
 
 function Notes({lastElements, className, disabled}) {
 
-  const {items, tracks} = React.useContext(DataContext)
+  const items = []
 
   const endedItems = items?.filter(e => {
     return e?.status === 'ended'

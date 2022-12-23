@@ -8,7 +8,6 @@ import { theme } from '../utlis/theme'
 
 function MyApp({ Component, pageProps }) {
 
-
   return (
     <MantineProvider
       theme={theme}

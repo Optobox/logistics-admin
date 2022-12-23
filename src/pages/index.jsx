@@ -2,7 +2,6 @@ import React from 'react'
 import Head from 'next/head'
 import Login from '../layout/Login'
 import { PermissionContext } from '../layout/Layout'
-import { UserData } from '../components'
 import { ManagerStats, LogistStats, ServiceStats, PurchaseStats, AdminStats } from '../components/stats'
 import Profile from './profile'
 

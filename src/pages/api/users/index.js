@@ -1,5 +1,4 @@
-import { serverTimestamp } from 'firebase/firestore';
-import {firebaseAdmin} from '../../../utlis/firebasdAdmin'
+import {firebaseAdmin} from '../../../utlis/firebaseAdmin'
 
 export default async function handler (req, res) {
 
@@ -13,15 +12,22 @@ export default async function handler (req, res) {
     uid: req.body.email
   })
   .then(async e => {
-    await admin.firestore().collection('users').doc(req.body.email).create({
+    await admin.firestore().collection('records').doc(req.body.email).create({
       email: req.body.email,
       displayName: req.body.displayName,
-      uid: req.body.email,
       phoneNumber: req.body.phoneNumber ?? null
     })
-    .then(e => {
-      res.json({
-       message: 'Пользователь создан'
+    .then(async e => {
+      await admin.firestore().collection('users').doc(req.body.email).create({
+        email: req.body.email,
+        displayName: req.body.displayName,
+        uid: req.body.email,
+        phoneNumber: req.body.phoneNumber ?? null
+      })
+      .then(async e => {
+        res.json({
+          message: 'Пользователь создан'
+         })
       })
     })
   })

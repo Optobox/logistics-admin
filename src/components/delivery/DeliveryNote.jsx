@@ -1,13 +1,14 @@
 import React from 'react'
 import { Button, Checkbox, TextInput } from '@mantine/core'
 import { trackValueSchema } from '../../utlis/validation'
-import { doc, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../../utlis/firebase'
 import { openConfirmModal } from '@mantine/modals'
 import { showNotification } from '@mantine/notifications'
 import { PermissionContext } from '../../layout/Layout'
+import { createdAt, timestamp } from '../../utlis/timestamp'
 
-function DeliveryNote({item, setItem}) {
+function DeliveryNote({item, setItem, working}) {
 
   const {tarif} = React.useContext(PermissionContext)
 
@@ -46,22 +47,39 @@ function DeliveryNote({item, setItem}) {
 
   const handlePack = e => {
     setPack(e)
+    setErrors({...errors, pack: []})
     setItem({...item, pack: e})
   }
 
+
   const trackOrder = async () => {
-    await updateDoc(doc(db, 'track', item?.id), {
+    const trackedDeliveries = item?.deliveries?.map(e => {
+      if (e.status === 'confirmed') {
+        e.status = 'comming'
+      }
+      return e
+    })
+    const day2 = 172800
+    const day1 = 86400
+    await setDoc(doc(db, 'tracking', item?.id), {
       ...item,
+      deliveries: [...trackedDeliveries],
       pack: pack,
       isTracking: true,
       step: 1,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
       our_cost: tarif?.our_cost,
       our_kg: tarif?.our_kg,
       our_cube: tarif?.our_cube,
+      day2: timestamp + day2,
+      day1: timestamp + day1,
+      status: 'tracking',
     })
-    .then(e => {
-      showNotification({ title: 'Накладная', message: `Накладная успешно добавлена, теперь вы можете начать отслеживать доставку`, color: 'green' })
+    .then(async e => {
+      await deleteDoc(doc(db, 'working', item?.id))
+      .then(() => {
+        showNotification({ title: 'Накладная', message: `Накладная успешно добавлена, теперь вы можете начать отслеживать доставку`, color: 'green' })
+      })
     })
     .catch(e => {
       showNotification({ title: 'Накладная', message: 'Не удалось добавить накладную', color: 'red' })
@@ -112,107 +130,114 @@ function DeliveryNote({item, setItem}) {
   })
 
   return (
-    <form className='flex flex-col gap-y-2 px-4'>
-      <TextInput
-        name='note_id'
-        value={item?.note_id ?? ''}
-        onChange={handleInputChange}
-        label="Накладная-ID"
-        error={errors?.note_id?.[0]}
-        readOnly={item?.isTracking}
-      />
-      <TextInput
-        label='Страховка'
-        value={item?.insurance ?? ''}
-        name='insurance'
-        onChange={handleInputChange}
-        readOnly={item?.isTracking}
-      />
-      <TextInput
-        name='boxes'
-        value={item?.boxes ?? ''}
-        onChange={handleInputChange}
-        label="Количество коробок"
-        error={errors?.boxes?.[0]}
-        readOnly={item?.isTracking}
-      />
-      <TextInput
-        name='cube'
-        value={item?.cube ?? ''}
-        onChange={handleInputChange}
-        label="Куб"
-        error={errors?.cube?.[0]}
-        readOnly={item?.isTracking}
-      />
-      <TextInput
-        name='cube_cost'
-        value={item?.cube_cost ?? ''}
-        onChange={handleInputChange}
-        label="Стоимость за куб"
-        error={errors?.cube_cost?.[0]}
-        readOnly={item?.isTracking}
-      />
-      <TextInput
-        name='weight'
-        value={item?.weight ?? ''}
-        onChange={handleInputChange}
-        label="Вес"
-        error={errors?.weight?.[0]}
-        readOnly={item?.isTracking}
-      />
-      <TextInput
-        name='weight_cost'
-        value={item?.weight_cost ?? ''}
-        onChange={handleInputChange}
-        label="Стоимость за кг"
-        error={errors?.weight_cost?.[0]}
-        readOnly={item?.isTracking}
-      />
-      <TextInput
-        name='total_cost'
-        value={item?.total_cost ?? ''}
-        onChange={handleInputChange}
-        label="Общая стоимость"
-        error={errors?.total_cost?.[0]}
-        readOnly={item?.isTracking}
-      />
-      <TextInput
-        name='pack_cost'
-        value={item?.pack_cost ?? ''}
-        onChange={handleInputChange}
-        label="Сборка товара"
-        error={errors?.pack_cost?.[0]}
-        readOnly={item?.isTracking}
-      />
-      <Checkbox.Group
-        label='Упаковка'
-        name='pack'
-        onChange={handlePack}
-        value={pack}
-        readOnly={item?.isTracking}
-      >
-        <Checkbox checked={pack?.includes('carton')} value='carton' label='Картон' classNames={{label: 'dark:text-gray-100'}} />
-        <Checkbox checked={pack?.includes('bag')} value='bag' label='Мешок' classNames={{label: 'dark:text-gray-100'}} />
-      </Checkbox.Group>
-      <TextInput
-        name='carcas'
-        value={item?.carcas ?? ''}
-        onChange={handleInputChange}
-        label="Карказ-обрешетка"
-        error={errors?.carcas?.[0]}
-        readOnly={item?.isTracking}
-      />
-      {!item?.isTracking && 
-        <Button 
-          className='lg:w-96 mx-auto' 
-          onClick={checkNote}
-          mt={20}
-          disabled={disabledButton}
+    <div>
+      <form className='grid grid-cols-4 gap-2 px-3'>
+        <TextInput
+          name='note_id'
+          value={item?.note_id ?? ''}
+          onChange={handleInputChange}
+          label="Накладная-ID"
+          error={errors?.note_id?.[0]}
+          readOnly={!working}
+        />
+        <TextInput
+          name='boxes'
+          value={item?.boxes ?? ''}
+          onChange={handleInputChange}
+          label="Количество коробок"
+          error={errors?.boxes?.[0]}
+          readOnly={!working}
+        />
+        <TextInput
+          name='weight'
+          value={item?.weight ?? ''}
+          onChange={handleInputChange}
+          label="Вес"
+          error={errors?.weight?.[0]}
+          readOnly={!working}
+        />
+        <TextInput
+          name='weight_cost'
+          value={item?.weight_cost ?? ''}
+          onChange={handleInputChange}
+          label="Стоимость за кг"
+          error={errors?.weight_cost?.[0]}
+          readOnly={!working}
+        />
+
+        <TextInput
+          name='total_cost'
+          value={item?.total_cost ?? ''}
+          onChange={handleInputChange}
+          label="Общая стоимость"
+          error={errors?.total_cost?.[0]}
+          readOnly={!working}
+        />
+        <TextInput
+          label='Страховка'
+          value={item?.insurance ?? ''}
+          error={errors?.insurance?.[0]}
+          name='insurance'
+          onChange={handleInputChange}
+          readOnly={!working}
+        />
+        <TextInput
+          name='cube'
+          value={item?.cube ?? ''}
+          onChange={handleInputChange}
+          label="Куб"
+          error={errors?.cube?.[0]}
+          readOnly={!working}
+        />
+        <TextInput
+          name='cube_cost'
+          value={item?.cube_cost ?? ''}
+          onChange={handleInputChange}
+          label="Стоимость за куб"
+          error={errors?.cube_cost?.[0]}
+          readOnly={!working}
+        />
+        <TextInput
+          name='pack_cost'
+          value={item?.pack_cost ?? ''}
+          onChange={handleInputChange}
+          label="Сборка товара"
+          error={errors?.pack_cost?.[0]}
+          readOnly={!working}
+        />
+        <TextInput
+          name='carcas'
+          value={item?.carcas ?? ''}
+          onChange={handleInputChange}
+          label="Карказ-обрешетка"
+          error={errors?.carcas?.[0]}
+          readOnly={!working}
+        />
+        <Checkbox.Group
+          label='Упаковка'
+          name='pack'
+          onChange={handlePack}
+          value={pack}
+          readOnly={!working}
+          error={errors?.pack?.[0]}
         >
-          Отправить
-        </Button>
-      }
-    </form>
+          <Checkbox checked={pack?.includes('carton')} value='carton' label='Картон' classNames={{label: 'dark:text-gray-100'}} />
+          <Checkbox checked={pack?.includes('bag')} value='bag' label='Мешок' classNames={{label: 'dark:text-gray-100'}} />
+        </Checkbox.Group>
+      </form>
+      <div className='flex justify-center'>
+        {!item?.isTracking && 
+          <Button 
+            className='lg:w-80 mx-auto' 
+            onClick={checkNote}
+            mt={20}
+            disabled={disabledButton}
+          >
+            Отправить
+          </Button>
+        }
+      </div>
+    </div>
   )
 }
 

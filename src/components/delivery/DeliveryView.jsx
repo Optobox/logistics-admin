@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, Collapse } from '@mantine/core'
 
-import { doc, updateDoc } from 'firebase/firestore'
+import { deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../../utlis/firebase'
 
 import { PermissionContext } from '../../layout/Layout'
@@ -10,9 +10,14 @@ import DeliveryBody from './DeliveryBody'
 import DeliverySteps from './DeliverySteps'
 import DeliveryNote from './DeliveryNote'
 import DeliveryDetails from './DeliveryDEtails'
+import { openConfirmModal } from '@mantine/modals'
+import { showNotification } from '@mantine/notifications'
 
+import { BiArrowToBottom } from 'react-icons/bi'
 
-function DeliveryView({values = []}) {
+import cn from 'classnames'
+
+function DeliveryView({values = [], status}) {
 
   const {manager, logist, admin, tarif} = React.useContext(PermissionContext)
 
@@ -21,7 +26,10 @@ function DeliveryView({values = []}) {
   const [item, setItem] = React.useState({})
   const [selected, setSelected] = React.useState(null)
 
-  const isTracking = item?.isTracking
+  const active = item?.status === 'active'
+  const working = item?.status === 'working'
+  const tracking = item?.status === 'tracking'
+  const delivered = item?.status === 'delivered'
 
   React.useEffect(() => {
     setItem(values?.find(e => e.id === item?.id))
@@ -32,14 +40,37 @@ function DeliveryView({values = []}) {
     setItem(item)
   }
 
+  const confirmTake = () => openConfirmModal({
+    title: 'Подтверждение действия',
+    centered: true, 
+    children: (
+      <p>Вы действительно хотите взять в работу доставку?</p>
+    ),
+    labels: {confirm: 'Взять', cancel: 'Отмена'},
+    onConfirm: () => takeTrack()
+  })
+
   const takeTrack = async () => {
-    await updateDoc(doc(db, 'track', item?.id), {
+    await setDoc(doc(db, 'working', item?.id), {
+      ...item,
       manager: {
         uid: user?.uid,
         email: user?.email,
         displayName: user?.displayName
       },
+      manager_email: user?.email,
+      status: 'working',
       logist_tarif: tarif?.logist_manager
+    })
+    .then(async () => {
+      showNotification({title: 'Доставка', message: `Доставка ${item?.id} у вас в работе!`})
+      await deleteDoc(doc(db, 'active', item?.id))
+      .then(() => {
+        setItem(null)
+      })
+    })
+    .catch(() => {
+      showNotification({title: 'Доставка', message: `Не удалось взять доставку в работу`, color: 'red'})
     })
   }
   const [visible, setVisible] = React.useState(false)
@@ -50,34 +81,53 @@ function DeliveryView({values = []}) {
         values={values}
         handleSelected={handleSelected}
         selected={selected}
+        status={status}
       />
       {selected && (
         <div className='space-y-4 dark:bg-slate-800'>
           <DeliveryDetails
             item={item}            
             setItem={setItem}
+            working={working}
           />
-          <Button
+          {tracking && (
+            <DeliverySteps
+              item={item}
+            />
+          )}
+          <p
             onClick={() => setVisible(q => !q)}
+            className='flex justify-center items-center gap-x-2 cursor-pointer text-xl select-none'
           >
             Накладная
-          </Button>
-          <Collapse in={visible}>
-            <DeliveryNote
-              item={item}
-              setItem={setItem}
-            />
-            {isTracking && (
-              <DeliverySteps
+            <span className={cn('transition-all duration-200 text-2xl',{
+              'rotate-180 text-blue-500': visible
+            })}>
+              <BiArrowToBottom/>
+            </span>
+          </p>
+
+          {!active && (
+            <Collapse in={visible}>
+              <DeliveryNote
                 item={item}
+                setItem={setItem}
+                working={working}
               />
-            )}
-          </Collapse>
-          {(!item?.manager && !item?.isTracking) && (
-            <Button onClick={takeTrack}>
-              Принять
-            </Button>
+
+            </Collapse>
           )}
+          <div>
+            {(!item?.manager && !item?.isTracking) && (
+              <Button 
+                onClick={confirmTake}
+                compact
+                variant='subtle'  
+              >
+                Принять
+              </Button>
+            )}
+          </div>
         </div>
       )}
     </div>

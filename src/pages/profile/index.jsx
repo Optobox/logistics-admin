@@ -99,13 +99,15 @@ function Profile() {
   if (!user) return <></>
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-4 ml-5'>
       <div className='flex gap-5 mt-6'>
         {edit ? 
           <div className='flex'>
-            <div className='mr-5'>
-              <img src={user?.photoURL} alt="" className='rounded-full w-16'/>
-            </div>
+            {user?.photoURL && (
+              <div className='mr-5'>
+                <img src={user?.photoURL} alt="" className='rounded-full w-16'/>
+              </div>
+            )}
             <div>
               <div className='flex gap-5 '>
                 <div>

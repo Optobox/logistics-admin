@@ -1,12 +1,14 @@
 import React from 'react'
-import { DataContext } from '../../layout/Layout'
+import { BidsContext, DataContext } from '../../layout/Layout'
 import Cell from '../Cell'
 import ItemView from '../../components/item/ItemView'
 import { DeliveryNotes, Notes } from '../finances'
 
 function AdminStats() {
 
-  const {items, consults, tracks} = React.useContext(DataContext)
+  const {items, consults, tracks} = React.useContext(BidsContext)
+
+  const createdAt = Math.floor(new Date().getTime() / 100)
 
   const deliveries = tracks?.map(e => {
     return e.deliveries
@@ -110,6 +112,9 @@ function AdminStats() {
   const same = items?.filter(e => {
     return e.same
   })
+
+  
+
 
   return (
     <>

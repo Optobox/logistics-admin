@@ -51,7 +51,7 @@ function Login() {
           )}
         </div>
       </div>
-      <p className='underline text-blue-400 cursor-pointer' onClick={() => setResetPassword(true)}>Забыли пароль?</p>
+      {/* <p className='underline text-blue-400 cursor-pointer' onClick={() => setResetPassword(true)}>Забыли пароль?</p> */}
       <div>
         <Button
           onClick={e => handleSubmit.login(e)}

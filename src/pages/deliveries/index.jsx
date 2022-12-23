@@ -1,14 +1,15 @@
 import React from 'react'
 
 import DeliveryView from '../../components/delivery/DeliveryView'
-import { DataContext, PermissionContext } from '../../layout/Layout'
+import { DataContext, PermissionContext, TrackContext } from '../../layout/Layout'
 import { Tabs } from '@mantine/core'
 import useAuth from '../../hooks/useAuth'
 
 function Deliveries() {
 
-
   const {tracks} = React.useContext(DataContext)
+
+  const {rawTracks} = React.useContext(TrackContext)
 
   const {service, purchase, transac, admin} = React.useContext(PermissionContext)
 
@@ -22,7 +23,6 @@ function Deliveries() {
     return !e.isTracking && !e.manager
   }))
 
-  console.log(deliveries);
   // const sortedBySMallest = deliveries?.sort((a, b) => {
   //   return b.createdAt?.seconds - a.createdAt?.seconds
   // })

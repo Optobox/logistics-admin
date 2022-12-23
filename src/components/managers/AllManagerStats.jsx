@@ -1,6 +1,6 @@
 import { Table } from '@mantine/core';
 import React from 'react'
-import { DataContext } from '../../layout/Layout';
+import { BidsContext } from '../../layout/Layout';
 
 const styles = {
   heading: 'text-2xl mb-4'
@@ -8,7 +8,7 @@ const styles = {
 
 function AllManagerStats({managers}) {
 
-  const {items, consults, tracks} = React.useContext(DataContext)
+  const {items, consults, tracks} = React.useContext(BidsContext)
   
   // manager
   const managerTracks = tracks?.filter(e => {

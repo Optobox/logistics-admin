@@ -24,6 +24,8 @@ function CreateManager() {
     other: []
   })
 
+  const [loading, setLoading] = React.useState(false)
+
   const yupErrorToErrorObject = (err) => {
     const object = {};
     err.inner.forEach((x) => {
@@ -51,6 +53,7 @@ function CreateManager() {
   }
 
   const createUser = async e => {
+    setLoading(true)
     await axios.post('/api/users', {
       email: visor.email,
       password: visor.password, 
@@ -64,6 +67,9 @@ function CreateManager() {
     })
     .catch(err => {
       setErrors({...errors, other: [err.response?.data?.message] });
+    })
+    .finally(() => {
+      setLoading(false)
     })
   }
 
@@ -119,6 +125,7 @@ function CreateManager() {
         )}
         <Button 
           type='submit'
+          loading={loading}
         >
           Создать
         </Button>

@@ -3,6 +3,7 @@ import { TextInput } from '@mantine/core'
 import { randomId } from '@mantine/hooks'
 import { addDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { db } from '../../utlis/firebase'
+import { timestamp } from '../../utlis/timestamp'
 
 function Banking() {
 
@@ -29,7 +30,7 @@ function Banking() {
     await addDoc(doc(db, 'transactions', randomid), {
       id: randomid,
       type: 'hande',
-      createdAt: serverTimestamp(),
+      createdAt: timestamp,
       count: trans.count,
       sale: trans.sale,
       buy: buy,

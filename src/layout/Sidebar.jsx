@@ -15,8 +15,6 @@ import { RiQuestionnaireLine } from 'react-icons/ri'
 import { FiShoppingCart } from 'react-icons/fi'
 import { BsTruck, BsBoxSeam } from 'react-icons/bs'
 
-
-
 function Sidebar({opened, setOpened}) {
 
   const router = useRouter()
@@ -90,25 +88,14 @@ function Sidebar({opened, setOpened}) {
           {((!service || purchase) && (service || !purchase)) && (
             !transac && (
               <>
-                <Link href={'/deliveries'}>
+                <Link href={'/tracks'}>
                   <div className={cn(styles.link, {
-                    [styles.activeLink]: router.pathname === '/deliveries'}
+                    [styles.activeLink]: router.pathname === '/tracks'}
                     )}
                   >
                     <BsBoxSeam className={styles.icon}/>
                     <span className={styles.label}>
-                      Посылки
-                    </span>
-                  </div>
-                </Link>
-                <Link href={'/track'}>
-                  <div className={cn(styles.link, {
-                    [styles.activeLink]: router.pathname === '/track'}
-                    )}
-                  >
-                    <BsTruck className={styles.icon}/>
-                    <span className={styles.label}>
-                      Отслеживание
+                      Доставки
                     </span>
                   </div>
                 </Link>

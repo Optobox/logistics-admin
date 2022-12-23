@@ -2,47 +2,13 @@ import { Tabs } from '@mantine/core'
 import React from 'react'
 import ItemView from '../../components/item/ItemView'
 
-import { DataContext, PermissionContext } from '../../layout/Layout'
-import useAuth from '../../hooks/useAuth'
-import Head from 'next/head'
+import { BidsContext, DataContext, PermissionContext } from '../../layout/Layout'
 
 function Bids({}) {
 
-  const { items } = React.useContext(DataContext)
-
+  const { rawBids, suggestedBids, rejectedBids, waitingBids, doneBids, endedBids } = React.useContext(BidsContext)
+  const { raws, suggesteds, rejecteds, waitings, dones } = React.useContext(DataContext)
   const { logist, purchase, transac, admin } = React.useContext(PermissionContext)
-
-  const {user} = useAuth()
-
-  const raw = items?.filter((item) => {
-    return item.status === 'raw'
-  })
-
-  const waiting = items?.filter((item) => {
-    return (item.status === 'waiting') && ((item.service_manager?.uid == user?.uid || item.purchase_manager?.uid == user?.uid) || admin)
-  })
-
-  const suggested = items?.filter((item) => {
-    return (item.status === "suggested") && ((item.service_manager?.uid == user?.uid || item.purchase_manager?.uid == user?.uid) || admin) && (!item.same)
-  })
-
-  const same = items?.filter((item) => {
-    return (item.status === "suggested") && ((item.service_manager?.uid == user?.uid || item.purchase_manager?.uid == user?.uid) || admin)
-  })
-
-  const concated = suggested?.concat(same)
-
-  const rejected = items?.filter((item) => {
-    return (item.status === "rejected") && ((item.service_manager?.uid == user?.uid || item.purchase_manager?.uid == user?.uid) || admin)
-  })
-
-  const done = items?.filter((item) => {
-    return (item.status == 'done') && ((item.service_manager?.uid == user?.uid || item.purchase_manager?.uid == user?.uid) || admin)
-  })
-
-  const ended = items?.filter((item) => {
-    return (item.status == 'ended') && ((item.service_manager?.uid == user?.uid || item.purchase_manager?.uid == user?.uid) || admin)
-  })
 
   if (purchase || logist || transac) return <></>
 
@@ -64,22 +30,22 @@ function Bids({}) {
           <Tabs.Tab value='Отклоненные'>Отклоненнo</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value='Активные' >
-          <ItemView values={raw} />
+          <ItemView values={admin ? raws : rawBids} status='raw' />
         </Tabs.Panel>
         <Tabs.Panel value='Ожидающие' >
-          <ItemView values={waiting} />
+          <ItemView values={admin ? waitings : waitingBids} status='waiting' />
         </Tabs.Panel>
         <Tabs.Panel value='Отклоненные' >
-          <ItemView values={rejected} />
+          <ItemView values={admin ? rejecteds : rejectedBids} status='rejected' />
         </Tabs.Panel>
         <Tabs.Panel value='Предложенные' >
-          <ItemView values={admin ? concated : suggested} />
+          <ItemView values={admin ? suggesteds : suggestedBids} status='suggested' />
         </Tabs.Panel>
         <Tabs.Panel value='Заключено' >
-          <ItemView values={done} />
+          <ItemView values={admin ? dones : doneBids} status='done' />
         </Tabs.Panel>
         <Tabs.Panel value='Завершено' >
-          <ItemView values={ended} />
+          <ItemView values={admin ? [] : endedBids} status='ended' />
         </Tabs.Panel>
       </Tabs>
     </div>

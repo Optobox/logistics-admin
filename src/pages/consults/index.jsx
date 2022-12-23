@@ -1,33 +1,32 @@
 import React from 'react'
 import { Tabs } from '@mantine/core'
-import { ConsultView } from '../../components'
-import { DataContext, PermissionContext } from '../../layout/Layout'
-import useAuth from '../../hooks/useAuth'
+import ConsultView from '../../components/ConsultView'
+import { ConsultContext, DataContext, PermissionContext } from '../../layout/Layout'
 
 function Consults() {
 
-  const {consults} = React.useContext(DataContext)
+  const {consults} = React.useContext(ConsultContext)
 
-  const {user} = useAuth()
+  const {allConsults, stats} = React.useContext(DataContext)
 
   const {admin} = React.useContext(PermissionContext)
 
-  const active = consults?.filter((item) => {
+  const active = allConsults?.filter((item) => {
     return item.status == 'raw'
   })
 
-  const rejected = consults?.filter((item) => {
-    return item.status === "rejected" && ((item.manager?.uid === user?.uid) || admin)
+  const rejected = allConsults?.filter((item) => {
+    return item.status === "rejected"
   })
 
-  const done = consults?.filter((item) => {
-    return item.status == 'done' && ((item.manager?.uid === user?.uid) || admin)
+  const done = allConsults?.filter((item) => {
+    return item.status === 'done'
   })
 
-  return (
+  return ( 
     <div className='w-full pb-24'>
       <div>
-        <Tabs
+        <Tabs 
           defaultValue='Активные'
           variant='pills'
           classNames={{
@@ -40,16 +39,16 @@ function Consults() {
             <Tabs.Tab value='Завершенные'>Завершенные</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value='Активные'>
-            <ConsultView values={active} />
+            <ConsultView values={admin ? active : consults} status='raw' />
           </Tabs.Panel>
 
           <Tabs.Panel value='Отклоненные'>
-            <ConsultView values={rejected} />
+            <ConsultView values={admin ? rejected : []} />
 
           </Tabs.Panel>
 
           <Tabs.Panel value='Завершенные'>
-            <ConsultView values={done} />
+            <ConsultView values={admin ? done : []} />
           </Tabs.Panel>
         </Tabs>
       </div>

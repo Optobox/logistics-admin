@@ -1,9 +1,12 @@
 import React from 'react'
 import { Button } from '@mantine/core'
 import { db } from '../../utlis/firebase'
-import { doc, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { arrayUnion, deleteDoc, doc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
 import cn from 'classnames'
 import { showNotification } from '@mantine/notifications'
+import { checkTime, timestamp } from '../../utlis/timestamp'
+
+import { openConfirmModal } from '@mantine/modals'
 
 
 function DeliverySteps({item}) {
@@ -31,23 +34,52 @@ function DeliverySteps({item}) {
     }) 
   }
 
+  const confirmEnd = () => openConfirmModal({
+    title: 'Подтверждение действия',
+    centered: true,
+    children: (
+      <p>Вы действительно хотите завершить доставку?</p>
+    ),
+    labels: {confirm: 'Завершить', cancel: 'Отмена'},
+    onConfirm: () => endTrack()
+  })
+
   const endTrack = async () => {
     const doneDeliveries = item?.deliveries?.map(e => {
-      if (e.status === 'confirmed') {
-        e.status = 'done'
+      if (e.status === 'comming') {
+        e.status = 'delivered'
       }
       return e
     })
-    await updateDoc(doc(db, 'track', item?.id), {
+    await setDoc(doc(db, 'delivered', item?.id), {
+      ...item,
       step: 5, 
       ended: true,
+      status: 'delivered',
       isTracking: false,
       deliveries: doneDeliveries,
-      updatedAt: serverTimestamp(),
-      endedAt: serverTimestamp(),
+      updatedAt: timestamp,
+      endedAt: timestamp,
     })
-    .then(e => {
-      showNotification({title: 'Доставка', message: 'Доставка успешно завершена', color: 'green'})
+    .then(async e => {
+      await updateDoc(doc(db, 'records', item?.manager_email), {
+        ['tracks-' + checkTime()]: arrayUnion({ 
+          ...item, 
+          step: 5, 
+          ended: true,
+          isTracking: false,
+          status: 'delivered',
+          deliveries: doneDeliveries,
+          updatedAt: timestamp,
+          endedAt: timestamp,
+        })
+      })
+      .then(async() => {
+        await deleteDoc(doc(db, 'tracking', item?.id))
+        .then(() => {
+          showNotification({title: 'Доставка', message: 'Доставка успешно завершена', color: 'green'})
+        })
+      })
     })
     .catch(err => {
       showNotification({title: 'Доставка', message: 'Не удалось завершить доставку', color: 'red'})
@@ -59,15 +91,17 @@ function DeliverySteps({item}) {
       <div className='flex gap-4 mt-6'>
         {steps.map((e) => {
           return (
-            <div 
+            <Button 
               key={e.id}
-              className={cn('py-4 px-6 border-2 rounded text-xl transition-all duration-200 cursor-pointer', {
+              className={cn('hover:bg-teal-400', {
                 'bg-teal-400 text-white': step === e.id
               })}
+              size='lg'
               onClick={() => setStep(e.id)}
+              disabled={e.id === 1 || e.id === 2}
             >
               {e.id}
-            </div> 
+            </Button> 
           )
         })}
       </div>
@@ -88,13 +122,15 @@ function DeliverySteps({item}) {
           <Button
             type='button' 
             onClick={changeStep}
-            >
+            disabled={item?.day2 > timestamp}
+          >
             Сохранить
           </Button>
         )}
         {step === 5 && (
           <Button
-            onClick={endTrack}
+            onClick={confirmEnd}
+            disabled={item?.day2 > timestamp}
           >
             Завершить
           </Button>

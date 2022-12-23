@@ -28,18 +28,56 @@ const consultSchema = yup.object().shape({
 })
 
 const trackValueSchema = yup.object().shape({
-  // insurance: yup.number().typeError(''),
-  boxes: yup.number().typeError('Введите число').required("Заполните данное поле"),
-  cube: yup.number().typeError('Введите число').required("Заполните данное поле"),
-  cube_cost: yup.number().typeError('Введите число').required("Заполните данное поле"),
-  weight: yup.number().typeError('Введите число').required("Заполните данное поле"),
-  weight_cost: yup.number().typeError('Введите число').required("Заполните данное поле"),
-  total_cost: yup.number().typeError('Введите число').required("Заполните данное поле"),
-  pack_cost: yup.number().typeError('Введите число').required("Заполните данное поле"),
+  insurance: yup
+    .number()
+    .typeError('Введите число')
+    .nullable()
+    .moreThan(0, "Число не может быть отричательным")
+    .transform((_, val) => (val !== "" ? Number(val) : null)),
+  boxes: yup.number().typeError('Введите число').required("Заполните данное поле").moreThan(0, "Число не может быть отричательным"),
+  cube: yup
+    .number()
+    .typeError('Введите число')
+    .nullable()
+    .moreThan(0, "Число не может быть отричательным")
+    .transform((_, val) => (val !== "" ? Number(val) : null)),
+  cube_cost:  yup
+    .number()
+    .typeError('Введите число')
+    .nullable()
+    .moreThan(0, "Число не может быть отричательным")
+    .transform((_, val) => (val !== "" ? Number(val) : null)),
+  weight: yup
+    .number()
+    .typeError('Введите число')
+    .nullable()
+    .moreThan(0, "Число не может быть отричательным")
+    .transform((_, val) => (val !== "" ? Number(val) : null)),
+  weight_cost:   yup
+    .number()
+    .typeError('Введите число')
+    .nullable()
+    .moreThan(0, "Число не может быть отричательным")
+    .transform((_, val) => (val !== "" ? Number(val) : null)),
+  total_cost: yup
+    .number()
+    .typeError('Введите число')
+    .required("Заполните данное поле")
+    .moreThan(0, "Число не может быть отричательным"),
+  pack_cost: yup
+  .number()
+  .typeError('Введите число')
+  .nullable()
+  .moreThan(0, "Число не может быть отричательным")
+  .transform((_, val) => (val !== "" ? Number(val) : null)),
   pack: yup.array().required("Заполните данное поле"),
-  // carcas: yup.number('Неверный формат, введите цифры').typeError(''),
   note_id: yup.string().required('Заполните данное поле'),
-  carcas: yup.number().typeError('Введите число')
+  carcas: yup
+    .number()
+    .typeError('Введите число')
+    .nullable()
+    .moreThan(0, "Число не может быть отричательным")
+    .transform((_, val) => (val !== "" ? Number(val) : null))
 })
 
 export {

@@ -33,7 +33,7 @@ function Header({}) {
               src={logo}
             />
             <span className='text-xl font-semibold font-jost'> 
-              OptoBox CRM  
+              OptoBox CRM  {user?.email}
             </span>
           </div>
         </Link>
@@ -48,7 +48,7 @@ function Header({}) {
                 <BsFillSunFill/>
               }
             </ActionIcon>
-            {user && (
+            {!!user && (
               <ActionIcon onClick={signout}>
                 <ImExit/>
               </ActionIcon>

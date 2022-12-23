@@ -1,5 +1,5 @@
 import React from 'react'
-import { Table } from '@mantine/core'
+import { Button, Table } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks';
 import cn from 'classnames'
 import dayjs from 'dayjs';
@@ -7,10 +7,19 @@ import { AiFillLike } from 'react-icons/ai';
 import { ImCoinDollar } from 'react-icons/im';
 import { FaMoneyBillAlt } from 'react-icons/fa';
 import quoteSeperateNumber from '../../utlis/quoteSeperator';
+import { BidsContext, PermissionContext } from '../../layout/Layout';
 
-function ItemBody({values = [], handleSelected, selected}) {
+function ItemBody({values = [], handleSelected, selected, status}) {
 
   const matches = useMediaQuery('(min-width: 1024px)');
+
+  const { loadMore, loadMoreByManager } = React.useContext(BidsContext)
+  const { admin } = React.useContext(PermissionContext)
+
+  const handleLoadMore = () => {
+    if (status === 'raw' || status === 'adopted') return loadMore(status)
+    return loadMoreByManager(status)
+  }
 
   return (
     <div className='bg-neutral-50 dark:bg-slate-800 h-full border-r dark:border-gray-700'>     
@@ -18,8 +27,8 @@ function ItemBody({values = [], handleSelected, selected}) {
         className='h-min dark:text-gray-200 '
       >
         <thead>
-          <tr >
-            <th>№</th>
+          <tr>
+            <th>ID</th>
             <th>Дата</th>
             {matches && <th>Cвязь</th>}
             {matches && <th>Вид</th>}
@@ -28,12 +37,14 @@ function ItemBody({values = [], handleSelected, selected}) {
             {matches && <th>Тип</th>}
             {matches && <th>Приоритет</th>}
             <th>Бюджет</th>
+            <th>service</th>
+            <th>purchase</th>
           </tr>
         </thead>
         <tbody>
           {values?.map((item, i) => {
 
-            const createdAt = dayjs(item?.createdAt?.seconds * 1000).format('DD.MM.YY, HH:mm')
+            const createdAt = dayjs(item?.createdAt * 1000).format('DD.MM.YY, HH:mm')
 
             return (
               <tr
@@ -43,9 +54,7 @@ function ItemBody({values = [], handleSelected, selected}) {
                   'dark:bg-gray-600 bg-slate-200': selected == item?.id,
                 })}
               >
-                <td className=''>
-                  {item?.number}
-                </td>
+                <td>{item?.id}</td>
                 <td className='whitespace-nowrap'>
                   {createdAt}
                 </td>
@@ -79,11 +88,28 @@ function ItemBody({values = [], handleSelected, selected}) {
                 <td>
                   {quoteSeperateNumber(Number(item.cost))}
                 </td>
+                <td>
+                  {item?.service_email}
+                </td>
+                <td>
+                  {item?.purchase_email}
+                </td>
               </tr>
             )
           })}
         </tbody>
       </Table>
+      <div className='flex justify-center mt-4'>
+        {!admin && (
+          <Button
+            onClick={handleLoadMore}
+            compact
+            variant='subtle'
+          >
+            Больше данных
+          </Button>
+        )}
+      </div>
     </div>
   )
 }

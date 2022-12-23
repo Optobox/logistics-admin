@@ -12,7 +12,7 @@ import { ItemContext, styles } from './ItemView'
 
 import cn from 'classnames'
 
-function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmModal }) {
+function ItemImages({ item, setItem, urls, saveItem, setUrls, sendItem, confirmModal }) {
 
   const { manager, service, admin, purchase } = React.useContext(PermissionContext)
   const { suggested, adopted, done } = React.useContext(ItemContext)
@@ -77,7 +77,7 @@ function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmM
               files[index].extra = e
             } 
             setUrls(files)
-            await updateDoc(doc(db, 'items', item?.id), {
+            await updateDoc(doc(db, item?.status, item?.id), {
               urls: files
             })
           }))
@@ -121,6 +121,8 @@ function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmM
 
     setItem({...item, urls: newUrls})
   }
+
+  console.log(urls);
 
   return (
     <>
@@ -306,6 +308,7 @@ function ItemImages({ item, setItem, saveItem, urls, setUrls, sendItem, confirmM
                     color={'green'}
                     className='mt-4 mb-6'
                     onClick={() => confirmModal('Вы действительно хотите отправить заявку?', 'suggested', 'Отправить', sendItem)}
+                    disabled={(!urls?.[0].link || !urls?.[0].cost)}
                   >
                     Отправить
                   </Button>

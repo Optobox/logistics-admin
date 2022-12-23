@@ -1,6 +1,6 @@
 import React from 'react'
-import { Tabs, TextInput, Select, PasswordInput, Button, Table } from '@mantine/core'
-import { firebaseAdmin } from '../../utlis/firebasdAdmin'
+import { Tabs, Table } from '@mantine/core'
+import { firebaseAdmin } from '../../utlis/firebaseAdmin'
 import { ChangeManagerPassword, CreateManager, ManagersTable } from '../../components/managers'
 import dayjs from 'dayjs'
 import AllManagerStats from '../../components/managers/AllManagerStats'
@@ -37,7 +37,7 @@ function Managers({users}) {
           <Tabs.Tab value='Управление'>Управление</Tabs.Tab>
           <Tabs.Tab value='Статистика' disabled={manager}>Статистика</Tabs.Tab>
         </Tabs.List>
-        <Tabs.Panel value='Управление'>
+        <Tabs.Panel value='Управление' pl={4}>
           <div className='space-y-4'>
             <div className='flex gap-16'>
               <CreateManager/>
@@ -74,7 +74,7 @@ function Managers({users}) {
             </Table>
           </div>
         </Tabs.Panel>
-        <Tabs.Panel value='Статистика'>
+        <Tabs.Panel value='Статистика' pl={4}>
           <AllManagerStats managers={managers} />
         </Tabs.Panel>
       </Tabs>

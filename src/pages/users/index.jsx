@@ -1,11 +1,10 @@
 import React from 'react'
-import { firebaseAdmin } from '../../utlis/firebasdAdmin'
+import { firebaseAdmin } from '../../utlis/firebaseAdmin'
 import { Table } from '@mantine/core';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
 function USers({users = []}) {
-
 
   return (
     <div className='w-full'>

@@ -2,7 +2,7 @@ import React from 'react'
 import { Button, NumberInput, Textarea, TextInput, Collapse } from '@mantine/core'
 import { db, storage } from '../../utlis/firebase'
 
-import { doc, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { arrayUnion, deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
 import { openConfirmModal } from '@mantine/modals'
 import { showNotification } from '@mantine/notifications'
 
@@ -13,6 +13,7 @@ import { useRouter } from 'next/router'
 import ItemDetails from './ItemDetails'
 import useAuth from '../../hooks/useAuth'
 import ItemImages from './ItemImages'
+import { checkTime, timestamp } from '../../utlis/timestamp'
 
 export const styles = {
   block: "grid grid-cols-[30%_auto]",
@@ -22,7 +23,7 @@ export const styles = {
 
 export const ItemContext = React.createContext(null)
 
-function ItemView({ values = [] }) {
+function ItemView({ values = [], status }) {
 
   const { manager, service, admin, purchase, tarif } = React.useContext(PermissionContext)
 
@@ -62,7 +63,7 @@ function ItemView({ values = [] }) {
   }
 
   const adoptItem = async (status) => {
-    await updateDoc(doc(db, 'items', item?.id), {
+    await setDoc(doc(db, 'adopted', item?.id), {
       ...item,
       urls: null,
       service_manager: {
@@ -70,13 +71,17 @@ function ItemView({ values = [] }) {
         name: user?.displayName,
         email: user?.email,
       },
+      service_email: user?.email,
       service_tarif: tarif.service_manager,
       purchase_tarif: tarif.purchase_manager,
       status: status,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
     })
-    .then((e) => {
-      clearItem()
+    .then(async e => {
+      await deleteDoc(doc(db, item?.status, item?.id))
+      .then(() => {
+        clearItem()
+      })
     })
     .catch((err) => {
       console.log(err, 'err');
@@ -84,19 +89,23 @@ function ItemView({ values = [] }) {
   }
 
   const sendItem = async (status) => {
-    await updateDoc(doc(db, 'items', item?.id), {
+    await setDoc(doc(db, 'suggested', item?.id), {
       ...item,
       urls: (urls && [...urls]) ?? null,
+      purchase_email: user?.email,
       purchase_manager: {
         uid: user?.uid,
         name: user?.displayName,
         email: user?.email,
       },
       status: status,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
     })
-    .then((e) => {
-      clearItem()
+    .then(async (e) => {
+      await deleteDoc(doc(db, 'adopted', item?.id))
+      .then(() => {
+        clearItem()
+      })
     })
     .catch((err) => {
       console.log(err, 'err');
@@ -104,20 +113,24 @@ function ItemView({ values = [] }) {
   }
 
   const moreDataItem = async (status) => {
-    await updateDoc(doc(db, 'items', item?.id), {
+    await setDoc(doc(db, 'waiting', item?.id), {
       ...item,
       urls: (urls && [...urls]) ?? null,
-      more_data: item?.more_data,
+      purchase_email: user?.email,
       purchase_manager: {
         uid: user?.uid,
         name: user?.displayName,
         email: user?.email,
       },
+      more_data: item?.more_data,
       status: status,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
     })
-    .then((e) => {
-      clearItem()
+    .then(async (e) => {
+      await deleteDoc(doc(db, 'adopted', item?.id))
+      .then(() => {
+        clearItem()
+      })
     })
     .catch((err) => {
       console.log(err, 'err');
@@ -125,17 +138,20 @@ function ItemView({ values = [] }) {
   }
 
   const sameItem = async (status) => {
-    await updateDoc(doc(db, 'items', item?.id), {
+    await setDoc(doc(db, 'suggested', item?.id), {
       ...item,
       urls: (urls && [...urls]) ?? null,
       same: true,
       status: status,
       service_tarif: tarif.service_manager,
       purchase_tarif: 0,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
     })
-    .then((e) => {
-      clearItem()
+    .then(async (e) => {
+      await deleteDoc(doc(db, item?.status, item?.id))
+      .then(() => {
+        clearItem()
+      })
     })
     .catch((err) => {
       console.log(err, 'err');
@@ -143,14 +159,13 @@ function ItemView({ values = [] }) {
   }
 
   const rejectItem = async (status) => {
-    await updateDoc(doc(db, 'items', item?.id), {
+    await setDoc(doc(db, 'rejected', item?.id), {
       ...item,
       urls: null,
+      service_email: user?.email ,
       status: status,
       reject_status: item?.status,
-      service_manager: null,
-      purchase_manager: null,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
     })
     .then(async (e) => {
       if (item?.urls) {
@@ -166,7 +181,10 @@ function ItemView({ values = [] }) {
           }
         })
       }
-      setItem(null)
+      await deleteDoc(doc(db, item?.status, item?.id))
+      .then(() => {
+        setItem(null)
+      })
     })
     .catch((err) => {
       console.log(err, 'err');
@@ -174,16 +192,19 @@ function ItemView({ values = [] }) {
   }
 
   const restoreItem = async (status) => {
-    await updateDoc(doc(db, 'items', item?.id), {
+    await setDoc(doc(db, 'raw', item?.id), {
       ...item,
       status: status,
       restored: true,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
       service_tarif: null,
       purchase_tarif: null,
     })
-    .then((e) => {
-      clearItem()
+    .then(async (e) => {
+      await deleteDoc(doc(db, 'rejected', item?.id))
+      .then(() => {
+        clearItem()
+      })
     })
     .catch((err) => {
       console.log(err, 'err');
@@ -191,7 +212,7 @@ function ItemView({ values = [] }) {
   }
 
   const reAdoptItem = async (status) => {
-    await updateDoc(doc(db, 'items', item?.id), {
+    await setDoc(doc(db, 'adopted', item?.id), {
       ...item,
       cost: newItem?.cost,
       count: newItem?.count,
@@ -199,11 +220,14 @@ function ItemView({ values = [] }) {
       duration: newItem?.duration,
       urls: (urls && [...urls]) ?? null,
       status: status,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
       same: false
     })
-    .then((e) => {
-      clearItem()
+    .then(async e => {
+      await deleteDoc(doc(db, 'suggested', item?.id))
+      .then(() => {
+        clearItem()
+      })
     })
     .catch((err) => {
       console.log(err, 'err');
@@ -211,14 +235,17 @@ function ItemView({ values = [] }) {
   }
   
   const concludeItem = async (status) => {
-    await updateDoc(doc(db, 'items', item?.id), {
+    await setDoc(doc(db, 'done', item?.id), {
       ...item,
       recieved_sum: item?.recieved_sum,
       status: status,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
     })
-    .then((e) => {
-      clearItem()
+    .then(async e => {
+      await deleteDoc(doc(db, 'suggested', item?.id))
+      .then(() => {
+        clearItem()
+      })
     })
     .catch((err) => {
       console.log(err, 'err');
@@ -226,15 +253,36 @@ function ItemView({ values = [] }) {
   }
 
   const endItem = async (status) => {
-    await updateDoc(doc(db, 'items', item?.id), {
+    await setDoc(doc(db, 'ended', item?.id), {
       ...item,
       recieved_sum: item?.recieved_sum,
       status: status,
-      updatedAt: serverTimestamp(),
-      endedAt: serverTimestamp()
+      updatedAt: timestamp,
+      endedAt: timestamp
     })
-    .then((e) => {
-      clearItem()
+    .then(async (e) => {
+      await updateDoc(doc(db, 'records', item?.service_manager?.email), {
+        ['bids-' + checkTime()]: arrayUnion({
+          ...item,
+          recieved_sum: item?.recieved_sum,
+          status: status,
+          updatedAt: timestamp,
+          endedAt: timestamp
+        })
+      })
+      await updateDoc(doc(db, 'records', item?.purchase_manager?.email), {
+        ['bids-' + checkTime()]: arrayUnion({
+          ...item,
+          recieved_sum: item?.recieved_sum,
+          status: status,
+          updatedAt: timestamp,
+          endedAt: timestamp
+        })
+      })
+      await deleteDoc(doc(db, 'done', item?.id))
+      .then(() => {
+        clearItem()
+      })
     })
     .catch((err) => {
       console.log(err, 'err');
@@ -242,10 +290,10 @@ function ItemView({ values = [] }) {
   }
 
   const saveItem = async () => {
-    await updateDoc(doc(db, 'items', item?.id), {
+    await updateDoc(doc(db, item?.status, item?.id), {
       ...item,
       urls: [...urls],
-      updatedAt: serverTimestamp()
+      updatedAt: timestamp
     })
     .then(() => {
       showNotification({ title: 'Заявки', message: 'Заявка сохранена', color: 'green' })
@@ -271,7 +319,6 @@ function ItemView({ values = [] }) {
     confirmProps: {
       color: 'red',
       variant: 'outline',
-      disabled: !item?.reject_comment
     },
     onConfirm: () => rejectItem(status)
   })
@@ -318,6 +365,7 @@ function ItemView({ values = [] }) {
           <ItemBody 
             values={values} 
             handleSelected={handleSelected} 
+            status={status}
             selected={selected} 
           />
           {selected && (
@@ -380,6 +428,7 @@ function ItemView({ values = [] }) {
                       <Button
                         color={'green'}
                         onClick={() => confirmModal('Вы действительно хотите завершить заявку?', 'ended', 'Подтвердить', endItem)}
+                        disabled={!admin}
                       >
                         Завершить
                       </Button>
@@ -434,7 +483,7 @@ function ItemView({ values = [] }) {
                         <Button 
                           color={'red'} 
                           variant={'outline'}
-                          onClick={() => rejectModal('Вы действительно хотите принять заявку?', 'rejected', 'Отклонить', rejectItem)}
+                          onClick={() => rejectModal('Вы действительно хотите принять заявку?', 'rejected', 'Отклонить')}
                         >
                           Отклонить
                         </Button>

@@ -1,36 +1,13 @@
 import { Tabs } from '@mantine/core'
 import React from 'react'
 import ItemView from '../../components/item/ItemView'
-import useAuth from '../../hooks/useAuth'
-import { DataContext, PermissionContext } from '../../layout/Layout'
+import { BidsContext, PermissionContext } from '../../layout/Layout'
 
 function Orders() {
 
-  const {items} = React.useContext(DataContext)
+  const { adoptedBids, doneBids, suggestedBids, endedBids, waitingBids } = React.useContext(BidsContext)
 
-  const {manager, service, logist, transac, admin} = React.useContext(PermissionContext)
-
-  const {user} = useAuth()
-
-  const adopted = items?.filter((item => {
-    return (item?.status === 'adopted')
-  }))
-
-  const suggested = items?.filter((item => {
-    return (item?.status === 'suggested') && ((item?.purchase_manager?.uid == user?.uid) || admin)
-  }))
-  
-  const waiting = items?.filter((item => { 
-    return (item?.status === 'waiting') && ((item?.purchase_manager?.uid == user?.uid) || admin)
-  }))
-
-  const done = items?.filter((item => {
-    return (item?.status === 'done') && ((item?.purchase_manager?.uid == user?.uid) || admin)
-  }))
-
-  const ended = items?.filter((item => {
-    return (item?.status === 'ended') && ((item?.purchase_manager?.uid == user?.uid) || admin)
-  }))
+  const {manager, service, logist, transac } = React.useContext(PermissionContext)
 
   if (transac || logist) return <></>
 
@@ -50,19 +27,19 @@ function Orders() {
           <Tabs.Tab value='Завершено' disabled={service || manager}>Завершено</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value='Принятые'>
-          <ItemView values={adopted} />
+          <ItemView values={adoptedBids ?? []} status='adopted' />
         </Tabs.Panel>
         <Tabs.Panel value='Предложенные'>
-          <ItemView values={suggested} />
+          <ItemView values={suggestedBids} status='suggested' />
         </Tabs.Panel>
         <Tabs.Panel value='Ожидающие'>
-          <ItemView values={waiting} />
+          <ItemView values={waitingBids} status='waiting' />
         </Tabs.Panel>
         <Tabs.Panel value='Заключено'>
-          <ItemView values={done} />
+          <ItemView values={doneBids} status='done' />
         </Tabs.Panel>
         <Tabs.Panel value='Завершено'>
-          <ItemView values={ended} />
+          <ItemView values={endedBids} status='ended' />
         </Tabs.Panel>
       </Tabs>
   )

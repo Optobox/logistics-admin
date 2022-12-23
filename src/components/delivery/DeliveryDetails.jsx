@@ -5,11 +5,12 @@ import { showNotification } from '@mantine/notifications'
 import { doc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { db } from '../../utlis/firebase'
 import { useClipboard } from '@mantine/hooks'
+import { timestamp } from '../../utlis/timestamp'
 
-function DeliveryDetails({item, setItem}) {
+function DeliveryDetails({item, setItem, working}) {
 
   const saveWeight = async () => {
-    await updateDoc(doc(db, 'track', item.id), {
+    await updateDoc(doc(db, item.status, item.id), {
       deliveries: [...item?.deliveries],
       updatedAt: serverTimestamp(),
     })
@@ -43,15 +44,16 @@ function DeliveryDetails({item, setItem}) {
         status: name
       }
     }
-    await updateDoc(doc(db, "track", item?.id), {
+    await updateDoc(doc(db, item?.status, item?.id), {
       ...item,
       deliveries: tempDeliveries,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
     })
-    .then(e => {
+    .then(e => { 
       showNotification({ title: 'Доставка', message: `Заявка на доставку успешно обновлена!`, color: 'green' })
     })
     .catch(e => {
+      console.log(e);
       showNotification({ title: 'Доставка', message: `Не удалось обновить доставку`, color: 'red' })
     })
   }
@@ -66,7 +68,7 @@ function DeliveryDetails({item, setItem}) {
       }).join('')
     )
   }
-  
+
   return (
     <div className='space-y-4'>
       <Table className=''>
@@ -100,15 +102,16 @@ function DeliveryDetails({item, setItem}) {
                         {e.status === 'waiting' && 'В ожидании'}
                         {e.status === 'failed' && 'Не найден'}
                         {e.status === 'canceled' && 'Отменен'}
-                        {e.status === 'done' && 'Доставлено'}
+                        {e.status === 'comming' && 'В пути'}
+                        {e.status === 'delivered' && 'Доставлено'}
                       </Button>
                     </Menu.Target>
                     <Menu.Dropdown>
-                      <Menu.Item onClick={() => changeStatus('pending', i)}>В обработке</Menu.Item>
-                      <Menu.Item onClick={() => changeStatus('confirmed', i)}>На складе</Menu.Item>
-                      <Menu.Item onClick={() => changeStatus('waiting', i)}>В ожидании</Menu.Item>
-                      <Menu.Item onClick={() => changeStatus('failed', i)}>Не найден</Menu.Item>
-                      <Menu.Item onClick={() => changeStatus('canceled', i)}>Отменен</Menu.Item>
+                      <Menu.Item disabled={!working} onClick={() => changeStatus('pending', i)}>В обработке</Menu.Item>
+                      <Menu.Item disabled={!working} onClick={() => changeStatus('confirmed', i)}>На складе</Menu.Item>
+                      <Menu.Item disabled={!working} onClick={() => changeStatus('waiting', i)}>В ожидании</Menu.Item>
+                      <Menu.Item disabled={!working} onClick={() => changeStatus('failed', i)}>Не найден</Menu.Item>
+                      <Menu.Item disabled={!working} onClick={() => changeStatus('canceled', i)}>Отменен</Menu.Item>
                     </Menu.Dropdown>
                   </Menu>
                 </td>
@@ -128,10 +131,11 @@ function DeliveryDetails({item, setItem}) {
                     }}
                     rightSection={'кг'}
                     onChange={(val) => handleWeightChange(val, i)}
+                    disabled={!working}
                   />
                 </td>
                 <td className='whitespace-nowrap'>
-                  {dayjs(e?.createdAt?.seconds * 1000).format('DD.MM.YY, HH:mm')}  
+                  {dayjs(e?.createdAt * 1000).format('DD.MM.YY, HH:mm')}  
                 </td>
               </tr>
             )
@@ -143,7 +147,10 @@ function DeliveryDetails({item, setItem}) {
           <Button>
             Скопировать все trackID
           </Button>
-          <Button onClick={saveWeight}>
+          <Button 
+            onClick={saveWeight}
+            disabled={!working}
+          >
             Сохранить
           </Button>
         </div>
