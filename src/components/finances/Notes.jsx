@@ -5,10 +5,16 @@ import cn from 'classnames'
 
 import {styles} from '../item/ItemView'
 import quoteSeperateNumber from '../../utlis/quoteSeperator'
+import { DataContext } from '../../layout/Layout'
 
 function Notes({lastElements, className, disabled}) {
 
   const items = []
+
+  const {records} = React.useContext(DataContext)
+
+  console.log(records);
+  
 
   const endedItems = items?.filter(e => {
     return e?.status === 'ended'

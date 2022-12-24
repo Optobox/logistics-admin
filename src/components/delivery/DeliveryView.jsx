@@ -16,6 +16,7 @@ import { showNotification } from '@mantine/notifications'
 import { BiArrowToBottom } from 'react-icons/bi'
 
 import cn from 'classnames'
+import { timestamp } from '../../utlis/timestamp'
 
 function DeliveryView({values = [], status}) {
 
@@ -30,6 +31,7 @@ function DeliveryView({values = [], status}) {
   const working = item?.status === 'working'
   const tracking = item?.status === 'tracking'
   const delivered = item?.status === 'delivered'
+  const prepared = item?.status === 'prepared'
 
   React.useEffect(() => {
     setItem(values?.find(e => e.id === item?.id))
@@ -39,6 +41,16 @@ function DeliveryView({values = [], status}) {
     setSelected(id)
     setItem(item)
   }
+
+  const confirmActive = () => openConfirmModal({
+    title: 'Подтверждение действия',
+    centered: true, 
+    children: (
+      <p>Вы действительно хотите запустить доставку?</p>
+    ),
+    labels: {confirm: 'Запуустить', cancel: 'Отмена'},
+    onConfirm: () => activateTrack()
+  })
 
   const confirmTake = () => openConfirmModal({
     title: 'Подтверждение действия',
@@ -73,6 +85,25 @@ function DeliveryView({values = [], status}) {
       showNotification({title: 'Доставка', message: `Не удалось взять доставку в работу`, color: 'red'})
     })
   }
+
+  const activateTrack = async () => {
+    await updateDoc(doc(db, 'active', item?.id), {
+      ...item,
+      status: 'active',
+      updatedAt: timestamp,
+    })
+    .then(async () => {
+      showNotification({title: 'Доставка', message: `Доставка ${item?.id} у вас в работе!`})
+      await deleteDoc(doc(db, 'active', item?.id))
+      .then(() => {
+        setItem(null)
+      })
+    })
+    .catch(() => {
+      showNotification({title: 'Доставка', message: `Не удалось взять доставку в работу`, color: 'red'})
+    })
+  }
+
   const [visible, setVisible] = React.useState(false)
 
   return (
@@ -94,6 +125,13 @@ function DeliveryView({values = [], status}) {
             <DeliverySteps
               item={item}
             />
+          )}
+          {prepared && (
+            <Button
+              onClick={confirmActive}
+            >
+              Запустить
+            </Button>
           )}
           <p
             onClick={() => setVisible(q => !q)}

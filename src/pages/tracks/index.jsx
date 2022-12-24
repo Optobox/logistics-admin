@@ -1,7 +1,11 @@
 import { Tabs } from '@mantine/core'
+import { collection, query, where } from 'firebase/firestore'
 import React from 'react'
+import { useCollectionData } from 'react-firebase-hooks/firestore'
+import CreateTrack from '../../components/delivery/CreateTrack'
 import DeliveryView from '../../components/delivery/DeliveryView'
 import { DataContext, PermissionContext, TrackContext } from '../../layout/Layout'
+import { db } from '../../utlis/firebase'
 
 function Tracks() {
 
@@ -10,6 +14,10 @@ function Tracks() {
   const {actives, workings, trackings, delivereds} = React.useContext(DataContext)
 
   const {service, purchase, transac, admin} = React.useContext(PermissionContext)
+
+  const [ready] = useCollectionData(query(collection(db, (admin ? 'active' : ' ')), where('status', '==', 'prepared')))
+
+  console.log(ready);
 
   if (service || purchase || transac) return <></>
 
@@ -28,6 +36,7 @@ function Tracks() {
             <Tabs.Tab value='В работе'>В работе</Tabs.Tab>
             <Tabs.Tab value='Отслеживается'>Отслеживается</Tabs.Tab>
             <Tabs.Tab value='Доставлено'>Доставлено</Tabs.Tab>
+            <Tabs.Tab value='Готовые' disabled={!admin}>Готовые</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value='Активные'>
             <DeliveryView values={admin ? actives : active} status='active' />
@@ -41,6 +50,13 @@ function Tracks() {
           <Tabs.Panel value='Доставлено'>
             <DeliveryView values={admin ? delivereds : delivered} status='delivered' />
           </Tabs.Panel>
+          <Tabs.Panel value='Готовые'>
+            <DeliveryView values={ready ?? []} status='delivered' />
+            
+            {/* <CreateTrack/> */}
+            {/* <DeliveryView values={admin ? delivereds : delivered} status='delivered' /> */}
+          </Tabs.Panel>
+
         </Tabs>
       </div>
     </div>

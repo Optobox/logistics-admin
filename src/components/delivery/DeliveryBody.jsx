@@ -15,6 +15,14 @@ function DeliveryBody({values, handleSelected, selected, status}) {
     return loadMoreTracksByManager(status)
   }
 
+  const [items, setItems] = React.useState([])
+
+  React.useEffect(() => {
+    setItems(values?.filter(e => {
+      return e?.status !== 'prepared' || e?.status !== 'created'
+    }))
+  }, [status, values])
+
   return (
     <div>
       <Table className='h-min dark:text-gray-100 dark:bg-slate-800 bg-gray-50'>
@@ -29,9 +37,9 @@ function DeliveryBody({values, handleSelected, selected, status}) {
           </tr>
         </thead>
         <tbody>
-          {values?.map((item, i) => {
+          {items?.map((item, i) => {
 
-            const createdAt = dayjs(item?.createdAt?.seconds * 1000).format('DD.MM.YYYY, HH:mm')
+            const createdAt = dayjs(item?.createdAt * 1000).format('DD.MM.YYYY, HH:mm')
             const process = item?.deliveries?.find(q => q.status === 'confirmed')
             const pending = item?.deliveries?.every(q => q.status === 'pending')
             const building = item?.deliveries?.every(q => (q.status === 'confirmed') || (q.status === 'canceled'))

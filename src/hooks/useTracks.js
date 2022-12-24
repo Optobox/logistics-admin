@@ -74,6 +74,7 @@ function useTracks({admin, service, purchase, transac}) {
   const getActive = (callback, last) => {
     if (!user || service || purchase || transac) return
     const q = query(collection(db, 'active'),
+    where('status', '==', 'active'),
     orderBy('createdAt', 'asc'),
     limit(5));
     onSnapshot(q, (querySnapshot) => {

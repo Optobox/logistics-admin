@@ -26,7 +26,6 @@ function Layout({ children }) {
   const admin = user?.email?.includes('abylay19961996@gmail.com')
 
   const [tracks] = useCollectionData(query(collection(db, (logist || manager || admin) ? user ? 'track' : ' ' : ' '))) 
-  // const [consults] = useCollectionData(query(collection(db, logist ? ' ' : (user && admin) ? 'consults' : ' '))) 
 
   const [raws] = useCollectionData(query(collection(db, (admin ? 'raw' : ' '))))
   const [suggesteds] = useCollectionData(query(collection(db, (admin ? 'suggested' : ' '))))
@@ -42,11 +41,11 @@ function Layout({ children }) {
 
   const [allConsults] = useCollectionData(query(collection(db, (admin ? 'consults' : ' '))))
 
-  
+  const [records] = useCollectionData(query(collection(db, (admin ? 'records' : ' '))))
 
   const {rawBids, suggestedBids, adoptedBids, rejectedBids, waitingBids, doneBids, endedBids, loadMore, loadMoreByManager } = useBids({
-    service: service, 
     admin: admin,
+    service: service, 
     logist: logist, 
     transac: transac,
   })
@@ -62,7 +61,7 @@ function Layout({ children }) {
     admin: admin, 
     logist: logist, 
     transac: transac
-})
+  })
 
   const [tarif] = useDocumentData(doc(db, 'tarif', 'tarif')) 
   const [userData] = useDocumentData(doc(db, 'users', user?.email ?? ' ')) 
@@ -86,8 +85,9 @@ function Layout({ children }) {
         workings,
         trackings,
         delivereds,
-        stats 
-        }}
+        stats,
+        records
+      }}
       >
         <BidsContext.Provider value={{ rawBids, suggestedBids, rejectedBids,  waitingBids,  adoptedBids, doneBids, endedBids, loadMore, loadMoreByManager }}>
           <ConsultContext.Provider value={{ consults, loadMoreConsults}}>
@@ -119,7 +119,6 @@ function Layout({ children }) {
     </PermissionContext.Provider>
   )
 }
-
 
 export const withLayout = (Component) => {
   return function withLayoutComponent(props) {

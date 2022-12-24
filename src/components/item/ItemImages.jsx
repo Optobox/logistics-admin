@@ -14,7 +14,7 @@ import cn from 'classnames'
 
 function ItemImages({ item, setItem, urls, saveItem, setUrls, sendItem, confirmModal }) {
 
-  const { manager, service, admin, purchase } = React.useContext(PermissionContext)
+  const { manager, service } = React.useContext(PermissionContext)
   const { suggested, adopted, done } = React.useContext(ItemContext)
 
   const addUrl = () => {
@@ -121,8 +121,6 @@ function ItemImages({ item, setItem, urls, saveItem, setUrls, sendItem, confirmM
 
     setItem({...item, urls: newUrls})
   }
-
-  console.log(urls);
 
   return (
     <>

@@ -7,7 +7,7 @@ import { BidsContext, DataContext, PermissionContext } from '../../layout/Layout
 function Bids({}) {
 
   const { rawBids, suggestedBids, rejectedBids, waitingBids, doneBids, endedBids } = React.useContext(BidsContext)
-  const { raws, suggesteds, rejecteds, waitings, dones } = React.useContext(DataContext)
+  const { raws, suggesteds, rejecteds, waitings, dones, records } = React.useContext(DataContext)
   const { logist, purchase, transac, admin } = React.useContext(PermissionContext)
 
   if (purchase || logist || transac) return <></>

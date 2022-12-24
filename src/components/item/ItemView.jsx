@@ -15,6 +15,8 @@ import useAuth from '../../hooks/useAuth'
 import ItemImages from './ItemImages'
 import { checkTime, timestamp } from '../../utlis/timestamp'
 
+import { randomId } from '@mantine/hooks'
+
 export const styles = {
   block: "grid grid-cols-[30%_auto]",
   label: "text-sm",
@@ -233,18 +235,30 @@ function ItemView({ values = [], status }) {
       console.log(err, 'err');
     })
   }
+
   
   const concludeItem = async (status) => {
+    const randomID = randomId().slice(8, 20)
     await setDoc(doc(db, 'done', item?.id), {
       ...item,
       recieved_sum: item?.recieved_sum,
       status: status,
       updatedAt: timestamp,
+      track_id: randomID
     })
     .then(async e => {
-      await deleteDoc(doc(db, 'suggested', item?.id))
-      .then(() => {
-        clearItem()
+      await setDoc(doc(db, 'active', randomID), {
+        id: randomID, 
+        status: 'created',
+        step: 0,
+        bid_id: item?.id,
+        createdAt: timestamp,   
+      })
+      .then(async () => {
+        await deleteDoc(doc(db, 'suggested', item?.id))
+        .then(() => {
+          clearItem()
+        })
       })
     })
     .catch((err) => {
@@ -261,6 +275,11 @@ function ItemView({ values = [], status }) {
       endedAt: timestamp
     })
     .then(async (e) => {
+      await updateDoc(doc(db, 'active', item?.track_id), {
+        status: 'prepared',
+        deliveries: [...deliveries],
+        updatedAt: timestamp,
+      })
       await updateDoc(doc(db, 'records', item?.service_manager?.email), {
         ['bids-' + checkTime()]: arrayUnion({
           ...item,
@@ -358,6 +377,31 @@ function ItemView({ values = [], status }) {
 
   const [isOrder] = React.useState(router.includes('/orders'))
 
+  const [deliveries, setDeliveries] = React.useState([{
+    trackID: null, 
+    type: null,
+    comment: null
+  }])
+
+  const handleDeliveryChange = (val, name, index) => {
+    const newDeliveries = deliveries.map((e, i) => {
+      if (i === index) {
+        return { ...e, [name]: val }
+      } else {
+        return e
+      }
+    })
+    setDeliveries(newDeliveries)
+  }
+
+  const addDelivery = () => {
+    setDeliveries([...deliveries, {
+      trackID: null, 
+      type: null,
+      comment: null
+    }])
+  }
+
   return (
     <>
       <ItemContext.Provider value={{suggested, adopted, raw, waiting, ended, done, rejected, same}}>
@@ -424,11 +468,43 @@ function ItemView({ values = [], status }) {
                         />
                       </div>
                     )}
+                    {done && <>
+                    {deliveries.map((e, i) => {
+                        return (
+                          <div key={i} className='mb-6'>
+                            <TextInput
+                              label='Track-ID'
+                              value={e.trackID ?? ''}
+                              name='trackID'
+                              onChange={(v) => handleDeliveryChange(v.target.value, 'trackID', i)}
+                            />
+                            <TextInput
+                              label='Тип товара'
+                              value={e.type ?? ''}
+                              name='type'
+                              onChange={(v) => handleDeliveryChange(v.target.value, 'type', i)}
+                            />
+                            <TextInput
+                              label='Комментарий'
+                              value={e.comment ?? ''}
+                              name='comment'
+                              onChange={(v) => handleDeliveryChange(v.target.value, 'comment', i)}
+                            />
+                          </div>
+                        )
+                      })}
+                      <div>
+                      <Button variant='subtle' compact onClick={addDelivery}>
+                        Добавить еще
+                      </Button>
+                      </div>
+                    </>
+                    }
                     {done && (
                       <Button
                         color={'green'}
                         onClick={() => confirmModal('Вы действительно хотите завершить заявку?', 'ended', 'Подтвердить', endItem)}
-                        disabled={!admin}
+                        disabled={!admin || (!deliveries?.[0].trackID)}
                       >
                         Завершить
                       </Button>
